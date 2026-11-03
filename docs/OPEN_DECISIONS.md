@@ -38,6 +38,15 @@ These items must not be silently finalized by implementation. Record options, tr
 - Refunds, chargebacks, fraud reserves, and dispute handling.
 - Rules for tips, memberships, licensing, marketplace transactions, referrals, funds, and originals.
 
+- Economic beneficiary model: account, legal entity, creative identity, and multi-beneficiary/co-creator agreements.
+- Ledger posting model, reversal policy, accounting period, statements, and audit retention.
+- Definition of available funds, settlement maturity, reserves, and treatment of negative balances.
+- Currency minor-unit rules, FX source/timestamp, and cross-currency settlement.
+- Country-by-country payout availability, KYC/KYB, tax, sanctions, age, and consumer-protection obligations.
+- Refund/cancellation windows, chargeback allocation, and dispute/appeal process.
+- Financial staff separation of duties, dual approval thresholds, and payout execution controls.
+- Whether community curators, translators, accessibility contributors, reviewers, and referrers can earn, and how impact is verified.
+
 ## Technical
 
 - Database and hosting providers for this independent project.
