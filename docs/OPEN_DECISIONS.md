@@ -19,6 +19,16 @@ These items must not be silently finalized by implementation. Record options, tr
 - Evidence labels and the distinction between fact, belief, opinion, and interpretation.
 - Data retention, privacy, export, and deletion policies.
 
+## Creator teams — OPEN
+
+- Whether team invitations should target an existing RAVINE account, verified email, or both.
+- Whether one account may join multiple creator teams and whether a creator identity may have multiple owners.
+- Proposed team labels in the initial schema: manager, editor, analyst. These labels do not yet define an approved permission matrix.
+- Exact permissions for works, media, rights declarations, audience/community management, analytics, monetization, payouts, and account settings.
+- Whether team members may invite other members, and which roles may remove or suspend members.
+- Ownership transfer, creator incapacity, disputes, and team exit procedures.
+- Invitation expiry, revocation, notification, and account-discovery safeguards.
+
 ## Economy
 
 - Revenue streams enabled at launch versus later phases.
