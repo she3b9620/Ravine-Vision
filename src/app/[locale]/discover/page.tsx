@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 const catalog = {
  ar: [
   {id:"all",label:"كل العوالم",title:"اكتشف ما يستحق انتباهك",desc:"مساحة اكتشاف متعددة الأشكال، تراعي السياق والجودة والتنوع."},
@@ -17,7 +18,8 @@ const catalog = {
   {id:"knowledge",label:"Knowledge",title:"Knowledge & thought",desc:"Books, research, lectures, philosophy, science, and open questions."},
   {id:"human",label:"Human stories",title:"Human experience",desc:"Testimony, memory, culture, traditions, and lived stories."}
  ]};
-export default function DiscoverPage({params}:{params:{locale:string}}){
+export default function DiscoverPage(){
+ const params=useParams<{locale:string}>();
  const ar=params.locale==="ar";const items=catalog[ar?"ar":"en"];const [active,setActive]=useState("all");const selected=useMemo(()=>items.find(x=>x.id===active)??items[0],[items,active]);
  return <main className="rv-discover-page" dir={ar?"rtl":"ltr"}>
   <header className="rv-discover-header"><a className="rv-brand" href={`/${params.locale}`}><span>RAVINE<small>THE PATH TO LIGHT</small></span></a><nav><a href={`/${params.locale}/works`}>{ar?"الأعمال":"Works"}</a><a href={`/${params.locale}/creators`}>{ar?"المبدعون":"Creators"}</a><a href={`/${params.locale}/communities`}>{ar?"المجتمعات":"Communities"}</a></nav><a className="rv-discover-profile" href={`/${params.locale}/profile`}>{ar?"مساحتك":"Your space"} ↗</a></header>
