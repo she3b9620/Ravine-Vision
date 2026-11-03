@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
 import RAVINEControls from "@/components/ravine-controls";
+import { createClient } from "@/lib/supabase/server";
+import MemberHome from "@/components/member-home";
+
+export const dynamic = "force-dynamic";
 
 const content = {
   ar: {
@@ -61,6 +65,9 @@ const content = {
 export default async function LocalizedHome({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (locale !== "ar" && locale !== "en") notFound();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) return <MemberHome locale={locale} displayName={String(user.user_metadata?.display_name ?? user.email?.split("@")[0] ?? (locale === "ar" ? "عضو رافين" : "RAVINE member"))} email={user.email ?? ""} />;
   const t = content[locale];
   const ar = locale === "ar";
   return (
