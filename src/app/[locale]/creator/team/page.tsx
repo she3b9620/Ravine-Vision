@@ -23,8 +23,17 @@ export default async function CreatorTeamPage({ params, searchParams }: Props) {
     : { data: [] as {creator_identity_id:string;account_id:string;role:string;status:string;joined_at:string}[] };
   const { data: ownedInvitations } = ownedIds.length
     ? await supabase.from("creator_team_invitations").select("id,creator_identity_id,invited_account_id,role,status,created_at,expires_at").in("creator_identity_id", ownedIds).order("created_at", { ascending: false })
-    : { data: [] as {id:string;creator_identity_id:string;invited_account_id:string;role:string;status:string;created_at:string}[] };
-  const { data: receivedInvitations } = await supabase.rpc("list_my_pending_creator_team_invitations");
+    : { data: [] as {id:string;creator_identity_id:string;invited_account_id:string;role:string;status:string;created_at:string;expires_at:string}[] };
+  const { data: receivedInvitationRows } = await supabase.rpc("list_my_pending_creator_team_invitations");
+  const receivedInvitations = (receivedInvitationRows ?? []) as {
+    invitation_id: string;
+    identity_display_name: string;
+    identity_handle: string | null;
+    invited_role: string;
+    invitation_status: string;
+    invitation_created_at: string;
+    invitation_expires_at: string;
+  }[];
 
   const roleLabel: Record<string,string> = ar
     ? {manager:"مدير فريق",editor:"محرر",analyst:"محلل"}
