@@ -38,3 +38,29 @@ export async function respondToCreatorTeamInvitation(formData: FormData) {
   });
   redirect(route(locale) + (error ? "?error=response" : "?updated=1"));
 }
+
+export async function revokeCreatorTeamInvitation(formData: FormData) {
+  const locale = String(formData.get("locale") ?? "ar");
+  const invitationId = String(formData.get("invitation_id") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(invitationId)) redirect(route(locale) + "?error=validation");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/" + (locale === "en" ? "en" : "ar") + "/login");
+  const { error } = await supabase.rpc("revoke_creator_team_invitation", { p_invitation_id: invitationId });
+  redirect(route(locale) + (error ? "?error=owner_action" : "?updated=1"));
+}
+
+export async function removeCreatorTeamMember(formData: FormData) {
+  const locale = String(formData.get("locale") ?? "ar");
+  const identityId = String(formData.get("creator_identity_id") ?? "");
+  const memberId = String(formData.get("member_account_id") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(identityId) || !/^[0-9a-f-]{36}$/i.test(memberId)) redirect(route(locale) + "?error=validation");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/" + (locale === "en" ? "en" : "ar") + "/login");
+  const { error } = await supabase.rpc("remove_creator_team_member", {
+    p_creator_identity_id: identityId,
+    p_member_account_id: memberId,
+  });
+  redirect(route(locale) + (error ? "?error=owner_action" : "?updated=1"));
+}
