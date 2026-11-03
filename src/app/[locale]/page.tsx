@@ -53,7 +53,7 @@ export default async function LocalizedHome({ params }: { params: Promise<{ loca
       <header className="rv-header">
         <a className="rv-logo" href={`/${locale}`}>RAVINE<span>.</span></a>
         <nav>{t.nav.map((item, i) => <a key={item} href={[`/${locale}/discover`,`/${locale}/works`,`/${locale}/creators`,`/${locale}/communities`,`/${locale}/about`][i]}>{item}</a>)}</nav>
-        <div className="rv-head-actions"><a className="rv-lang" href={`/${ar ? "en" : "ar"}`}>{ar ? "EN" : "عربي"}</a><a className="rv-join" href={`/${locale}/profile`}>{ar ? "ابدأ رحلتك" : "Join RAVINE"}</a></div>
+        <div className="rv-head-actions"><a className="rv-lang" href={`/${ar ? "en" : "ar"}`}>{ar ? "EN" : "عربي"}</a><a className="rv-join" href={`/${locale}/login`}>{ar ? "ابدأ رحلتك" : "Join RAVINE"}</a></div>
       </header>
       <section className="rv-hero">
         <div className="rv-hero-image" aria-hidden="true" />
