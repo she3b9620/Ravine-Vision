@@ -104,6 +104,7 @@ create table public.rights_declarations (
 create table public.communities (
   id uuid primary key default gen_random_uuid(),
   owner_creator_identity_id uuid references public.creator_identities(id) on delete set null,
+  created_by uuid not null references public.profiles(id) on delete restrict,
   name text not null,
   description text,
   visibility public.community_visibility not null default 'public',
@@ -258,9 +259,9 @@ for insert to authenticated with check (claimant_account_id = (select auth.uid()
 create policy "Public communities are discoverable" on public.communities
 for select to anon, authenticated using (visibility = 'public' or exists (select 1 from public.community_memberships m where m.community_id = id and m.account_id = (select auth.uid()) and m.status = 'active'));
 create policy "Community owners create communities" on public.communities
-for insert to authenticated with check (owner_creator_identity_id is null or exists (select 1 from public.creator_identities c where c.id = owner_creator_identity_id and c.owner_account_id = (select auth.uid())));
+for insert to authenticated with check (created_by = (select auth.uid()) and (owner_creator_identity_id is null or exists (select 1 from public.creator_identities c where c.id = owner_creator_identity_id and c.owner_account_id = (select auth.uid()))));
 create policy "Community owners update communities" on public.communities
-for update to authenticated using (exists (select 1 from public.creator_identities c where c.id = owner_creator_identity_id and c.owner_account_id = (select auth.uid()))) with check (exists (select 1 from public.creator_identities c where c.id = owner_creator_identity_id and c.owner_account_id = (select auth.uid())));
+for update to authenticated using (created_by = (select auth.uid())) with check (created_by = (select auth.uid()) and (owner_creator_identity_id is null or exists (select 1 from public.creator_identities c where c.id = owner_creator_identity_id and c.owner_account_id = (select auth.uid()))));
 
 create policy "Members see their own membership" on public.community_memberships
 for select to authenticated using (account_id = (select auth.uid()) or exists (select 1 from public.communities c join public.creator_identities ci on ci.id = c.owner_creator_identity_id where c.id = community_id and ci.owner_account_id = (select auth.uid())));
