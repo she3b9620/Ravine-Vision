@@ -10,12 +10,14 @@ export default async function EditWorkPage({params}:Props){
  if(locale!=="ar"&&locale!=="en") notFound();
  const ar=locale==="ar"; const supabase=await createClient();
  const {data:{user}}=await supabase.auth.getUser(); if(!user) redirect("/"+locale+"/login");
- const {data:work}=await supabase.from("works").select("id,title,synopsis,kind,language_code").eq("id",workId).eq("created_by",user.id).eq("status","draft").maybeSingle();
+ const {data:work}=await supabase.from("works").select("id,creator_identity_id,title,synopsis,kind,language_code").eq("id",workId).eq("created_by",user.id).eq("status","draft").maybeSingle();
  if(!work) notFound();
+ const {data:identity}=await supabase.from("creator_identities").select("display_name,handle").eq("id",work.creator_identity_id).eq("owner_account_id",user.id).maybeSingle();
+ if(!identity) notFound();
  return <main className="creator-screen" dir={ar?"rtl":"ltr"}>
  <header className="creator-header"><Link className="rv-logo" href={"/"+locale}>RAVINE<span>.</span></Link><nav><Link href={"/"+locale+"/creator/library"}>{ar?"مكتبة الأعمال":"Work library"}</Link></nav></header>
  <section className="creator-intro"><p className="rv-eyebrow"><i/>EDIT DRAFT</p><h1>{ar?"تعديل المسودة.":"Edit your draft."}</h1><p>{ar?"يمكن تعديل المسودة الخاصة فقط. لا تتضمن هذه الخطوة نشر العمل أو إتاحته للجمهور.":"Only private drafts can be edited here. This does not publish or expose the work."}</p></section>
- <section className="creator-panel"><p><Link className="creator-inline-link" href={"/"+locale+"/creator/library/"+work.id+"/rights"}>{ar?"إدارة الحقوق والملكية":"Manage rights & ownership"} ↗</Link> <Link className="creator-inline-link" href={"/"+locale+"/creator/library/"+work.id+"/media"}>{ar?"تجهيز الوسائط":"Prepare media"} ↗</Link></p><form action={updateWorkDraft} className="creator-form">
+ <section className="creator-panel"><div className="creator-identity"><strong>{ar?"الهوية المالكة للعمل":"Work-owning identity"}</strong><p>{identity.display_name} {identity.handle ? "(@"+identity.handle+")" : ""}</p><small>{ar?"لا يمكن تغيير الهوية المالكة من شاشة تعديل المسودة.":"The owning identity cannot be changed from the draft editor."}</small></div><p><Link className="creator-inline-link" href={"/"+locale+"/creator/library/"+work.id+"/rights"}>{ar?"إدارة الحقوق والملكية":"Manage rights & ownership"} ↗</Link> <Link className="creator-inline-link" href={"/"+locale+"/creator/library/"+work.id+"/media"}>{ar?"تجهيز الوسائط":"Prepare media"} ↗</Link></p><form action={updateWorkDraft} className="creator-form">
  <input type="hidden" name="locale" value={locale}/><input type="hidden" name="work_id" value={work.id}/>
  <label>{ar?"عنوان العمل":"Work title"}<input name="title" minLength={2} maxLength={160} required defaultValue={work.title}/></label>
  <label>{ar?"نبذة مختصرة":"Short synopsis"}<textarea name="synopsis" maxLength={3000} rows={5} defaultValue={work.synopsis??""}/></label>
