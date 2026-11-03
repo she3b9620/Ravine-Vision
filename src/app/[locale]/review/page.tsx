@@ -11,10 +11,14 @@ export default async function ReviewConsole({params,searchParams}:Props){
  const {data:role}=await supabase.rpc("current_staff_role");
  if(!role||!["reviewer","moderator","admin","owner"].includes(role))notFound();
  const canReview=["reviewer","admin","owner"].includes(role);const canModerate=["moderator","admin","owner"].includes(role);
- const [{data:applications},{data:rights},{data:reports},{data:tierRequests}]=await Promise.all([
-  supabase.from("creator_applications").select("id,creator_identity_id,applicant_account_id,statement,status,submitted_at").in("status",["submitted","under_review"]).order("submitted_at",{ascending:true}).limit(50),
-  supabase.from("rights_declarations").select("id,work_id,claimant_account_id,declaration,attribution_text,license_reference,evidence_references,review_status,created_at").in("review_status",["unreviewed","under_review"]).order("created_at",{ascending:true}).limit(50)
- ]).then(async ([a,r])=>{const q=canModerate?await supabase.from("safety_reports").select("id,reporter_account_id,target_type,target_id,category,explanation,evidence_references,status,created_at").in("status",["submitted","triaged","reviewing","appealed"]).order("created_at",{ascending:true}).limit(50):{data:[]};return [a,r,q,t];});
+ const applicationsResult=canReview?await supabase.from("creator_applications").select("id,creator_identity_id,applicant_account_id,statement,status,submitted_at").in("status",["submitted","under_review"]).order("submitted_at",{ascending:true}).limit(50):{data:[]};
+ const rightsResult=canReview?await supabase.from("rights_declarations").select("id,work_id,claimant_account_id,declaration,attribution_text,license_reference,evidence_references,review_status,created_at").in("review_status",["unreviewed","under_review"]).order("created_at",{ascending:true}).limit(50):{data:[]};
+ const reportsResult=canModerate?await supabase.from("safety_reports").select("id,reporter_account_id,target_type,target_id,category,explanation,evidence_references,status,created_at").in("status",["submitted","triaged","reviewing","appealed"]).order("created_at",{ascending:true}).limit(50):{data:[]};
+ const tierResult=canReview?await supabase.from("account_tier_requests").select("id,account_id,requested_tier,statement,status,submitted_at").in("status",["submitted","under_review"]).order("submitted_at",{ascending:true}).limit(50):{data:[]};
+ const applications=applicationsResult.data as Array<{id:string;statement:string;status:string;submitted_at:string}>|null;
+ const rights=rightsResult.data as Array<{id:string;declaration:string;review_status:string;work_id:string;attribution_text:string|null;license_reference:string|null;evidence_references:string[]}>|null;
+ const reports=reportsResult.data as Array<{id:string;category:string;target_type:string;status:string;target_id:string;explanation:string|null;evidence_references:string[]}>|null;
+ const tierRequests=tierResult.data as Array<{id:string;requested_tier:string;account_id:string;status:string;statement:string}>|null;
  return <main className="creator-screen" dir={ar?"rtl":"ltr"}>
  <header className="creator-header"><Link className="rv-logo" href={"/"+locale}>RAVINE<span>.</span></Link><nav><span>{ar?"لوحة المراجعة":"Review console"}</span></nav></header>
  <section className="creator-intro"><p className="rv-eyebrow"><i/>TRUST & REVIEW</p><h1>{ar?"المراجعة والمساءلة.":"Review & accountability."}</h1><p>{ar?"لوحة داخلية للمراجعين المخولين. كل قرار يُنفّذ عبر إجراء محمي ويُسجّل في سجل التدقيق.":"An internal console for authorized reviewers. Every decision runs through a protected operation and is recorded in the audit log."}</p><small>{ar?"الدور الحالي":"Current role"}: {role}</small></section>
