@@ -43,3 +43,17 @@ export async function signOutAction(formData: FormData) {
   await supabase.auth.signOut();
   redirect(path(locale, ""));
 }
+
+export async function signInWithGoogleAction(formData: FormData) {
+  const locale = String(formData.get("locale") ?? "ar") === "en" ? "en" : "ar";
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000") + "/" + locale + "/auth/callback",
+      queryParams: { access_type: "offline", prompt: "consent" },
+    },
+  });
+  if (error || !data.url) redirect(path(locale, "/login?error=callback"));
+  redirect(data.url);
+}
