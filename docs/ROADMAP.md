@@ -7,21 +7,21 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [x] Establish Next.js, React, and TypeScript application shell.
 - [x] Establish initial Arabic/English landing experience.
 - [x] Record charter, architecture boundaries, open decisions, and economy scope.
-- [ ] Verify install, lint, and production build in a real execution environment.
+- [x] Verify install, lint, and production build in a real execution environment.
 
 ## Phase 1 — Product skeleton
 - [x] Define shared brand and navigation models.
 - [x] Define initial work taxonomy and account/creator identity concepts.
 - [x] Add locale-prefixed landing, discovery, and about routes.
-- [ ] Add works, creators, communities, and creator-space route shells.
-- [ ] Add shared accessible UI primitives and empty/loading/error states.
+- [x] Add works, creators, communities, and creator-space route shells.
+- [x] Add shared accessible UI primitives and empty/loading/error states.
 - [ ] Add route and component tests.
 
 ## Phase 2 — Domain contracts
-- [ ] Define account, creator identity, work, community, rights, and moderation contracts.
-- [ ] Define authorization boundaries and threat model.
-- [ ] Define media lifecycle and provider adapter interfaces.
-- [ ] Define economy ledger and payout contracts without rates or providers.
+- [x] Define account, creator identity, work, community, rights, and moderation contracts.
+- [x] Define authorization boundaries and threat model.
+- [x] Define media lifecycle and provider adapter interfaces.
+- [x] Define economy ledger and payout contracts without rates or providers.
 
 ## Phase 3 — Controlled service integration
 - [ ] Select new isolated database and authentication services.
