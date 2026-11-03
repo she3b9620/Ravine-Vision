@@ -232,3 +232,11 @@ h1 { white-space: pre-line; font-size: clamp(52px, 6.6vw, 92px); line-height: 1.
 .creator-work-list .creator-identity>div small{color:#d49a78}
 
 .creator-inline-link{display:inline-flex;margin-top:12px;color:#d49a78;text-decoration:none;font-size:12px}.creator-inline-link:hover{color:#f1e9dc}
+
+
+.creator-review-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid #ffffff18}
+.creator-review-form label{grid-column:1/-1}
+.creator-review-form textarea{width:100%;background:#0d0f10;border:1px solid #ffffff26;border-radius:7px;padding:12px;color:#f1e9dc;font:inherit;resize:vertical}
+.creator-review-reject{min-height:44px;padding:10px 16px;border:1px solid #c47a52;background:transparent;color:#d49a78;border-radius:7px;font:inherit;cursor:pointer}
+.creator-review-reject:hover{background:#c47a521a}
+@media(max-width:640px){.creator-review-form{grid-template-columns:1fr}}
