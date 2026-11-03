@@ -22,11 +22,9 @@ export default async function CreatorTeamPage({ params, searchParams }: Props) {
     ? await supabase.from("creator_team_memberships").select("creator_identity_id,account_id,role,status,joined_at").in("creator_identity_id", ownedIds).order("joined_at", { ascending: false })
     : { data: [] as {creator_identity_id:string;account_id:string;role:string;status:string;joined_at:string}[] };
   const { data: ownedInvitations } = ownedIds.length
-    ? await supabase.from("creator_team_invitations").select("id,creator_identity_id,invited_account_id,role,status,created_at").in("creator_identity_id", ownedIds).order("created_at", { ascending: false })
+    ? await supabase.from("creator_team_invitations").select("id,creator_identity_id,invited_account_id,role,status,created_at,expires_at").in("creator_identity_id", ownedIds).order("created_at", { ascending: false })
     : { data: [] as {id:string;creator_identity_id:string;invited_account_id:string;role:string;status:string;created_at:string}[] };
-  const { data: receivedInvitations } = await supabase.from("creator_team_invitations")
-    .select("id,creator_identity_id,invited_account_id,role,status,created_at")
-    .eq("invited_account_id", user.id).eq("status", "pending").order("created_at", { ascending: false });
+  const { data: receivedInvitations } = await supabase.rpc("list_my_pending_creator_team_invitations");
 
   const roleLabel: Record<string,string> = ar
     ? {manager:"مدير فريق",editor:"محرر",analyst:"محلل"}
@@ -47,9 +45,10 @@ export default async function CreatorTeamPage({ params, searchParams }: Props) {
 
     <section className="creator-panel creator-team-section"><h2>{ar?"دعوات واردة إليك":"Invitations to you"}</h2>
       {receivedInvitations?.length ? receivedInvitations.map((invitation)=><article className="creator-identity" key={invitation.id}>
-        <strong>{identities?.find((identity)=>identity.id===invitation.creator_identity_id)?.display_name ?? (ar?"هوية إبداعية":"Creative identity")}</strong>
-        <small>{roleLabel[invitation.role] ?? invitation.role}</small>
-        <form action={respondToCreatorTeamInvitation} className="creator-team-actions"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="invitation_id" value={invitation.id}/><button name="decision" value="accepted" className="creator-submit">{ar?"قبول الدعوة":"Accept"}</button><button name="decision" value="declined" className="creator-review-reject">{ar?"رفض":"Decline"}</button></form>
+        <strong>{invitation.identity_display_name ?? (ar?"هوية إبداعية":"Creative identity")}</strong>
+        <small>{invitation.identity_handle ? "@"+invitation.identity_handle+" · " : ""}{roleLabel[invitation.invited_role] ?? invitation.invited_role}</small>
+        <small>{ar?"تنتهي":"Expires"}: {new Date(invitation.invitation_expires_at).toLocaleString(ar?"ar-EG":"en-GB")}</small>
+        <form action={respondToCreatorTeamInvitation} className="creator-team-actions"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="invitation_id" value={invitation.invitation_id}/><button name="decision" value="accepted" className="creator-submit">{ar?"قبول الدعوة":"Accept"}</button><button name="decision" value="declined" className="creator-review-reject">{ar?"رفض":"Decline"}</button></form>
       </article>) : <p className="creator-muted">{ar?"لا توجد دعوات معلقة.":"No pending invitations."}</p>}
     </section>
 
@@ -67,7 +66,7 @@ export default async function CreatorTeamPage({ params, searchParams }: Props) {
       <section className="creator-panel"><h2>{ar?"الفرق والعضويات":"Teams and memberships"}</h2>
         {identities?.length ? identities.map((identity)=><article className="creator-identity" key={identity.id}><h3>{identity.display_name}</h3><span>@{identity.handle}</span>
           {(memberships ?? []).filter((member)=>member.creator_identity_id===identity.id).map((member)=><div className="creator-identity" key={member.account_id}><p>{member.account_id} — {roleLabel[member.role]??member.role} · {statusLabel[member.status]??member.status}</p>{member.status==="active"&&<form action={removeCreatorTeamMember} className="creator-team-actions"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="creator_identity_id" value={identity.id}/><input type="hidden" name="member_account_id" value={member.account_id}/><button className="creator-review-reject" type="submit">{ar?"إزالة العضو":"Remove member"}</button></form>}</div>)}
-          {(ownedInvitations ?? []).filter((invitation)=>invitation.creator_identity_id===identity.id).map((invitation)=><div className="creator-identity" key={invitation.id}><p>{invitation.invited_account_id} — {roleLabel[invitation.role]??invitation.role} · {statusLabel[invitation.status]??invitation.status}</p>{invitation.status==="pending"&&<form action={revokeCreatorTeamInvitation} className="creator-team-actions"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="invitation_id" value={invitation.id}/><button className="creator-review-reject" type="submit">{ar?"إلغاء الدعوة":"Revoke invitation"}</button></form>}</div>)}
+          {(ownedInvitations ?? []).filter((invitation)=>invitation.creator_identity_id===identity.id).map((invitation)=><div className="creator-identity" key={invitation.id}><p>{invitation.invited_account_id} — {roleLabel[invitation.role]??invitation.role} · {statusLabel[invitation.status]??invitation.status}</p><small>{ar?"تنتهي":"Expires"}: {new Date(invitation.expires_at).toLocaleString(ar?"ar-EG":"en-GB")}</small>{invitation.status==="pending"&&<form action={revokeCreatorTeamInvitation} className="creator-team-actions"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="invitation_id" value={invitation.id}/><button className="creator-review-reject" type="submit">{ar?"إلغاء الدعوة":"Revoke invitation"}</button></form>}</div>)}
           {!memberships?.some((member)=>member.creator_identity_id===identity.id) && !ownedInvitations?.some((invitation)=>invitation.creator_identity_id===identity.id) && <p className="creator-muted">{ar?"لا يوجد أعضاء أو دعوات بعد.":"No members or invitations yet."}</p>}
         </article>) : <p className="creator-muted">{ar?"لا توجد هويات إبداعية.":"No creative identities."}</p>}
       </section>
