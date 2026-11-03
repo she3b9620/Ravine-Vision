@@ -6,13 +6,14 @@ import { signInWithGoogleAction } from "@/app/[locale]/auth/actions";
 export default function RAVINEControls({ locale }: { locale: "ar" | "en" }) {
   const ar = locale === "ar";
   const [open, setOpen] = useState(false);
-  const [light, setLight] = useState(false);
-  useEffect(() => {
+  const [light, setLight] = useState(() => {
+    if (typeof window === "undefined") return false;
     const saved = window.localStorage.getItem("ravine-theme");
-    const next = saved === "light";
-    setLight(next);
-    document.documentElement.dataset.theme = next ? "light" : "dark";
-  }, []);
+    return saved === "light";
+  });
+  useEffect(() => {
+    document.documentElement.dataset.theme = light ? "light" : "dark";
+  }, [light]);
   function toggleTheme() {
     const next = !light;
     setLight(next);

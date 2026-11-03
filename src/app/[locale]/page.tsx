@@ -76,14 +76,14 @@ export default async function LocalizedHome({ params }: { params: Promise<{ loca
         <a className="rv-brand" href={`/${locale}`} aria-label="RAVINE home"><span>RAVINE<small>THE PATH TO LIGHT</small></span></a>
         <p className="rv-side-label">{t.sideLabel}</p>
         <nav className="rv-side-nav">{t.nav.map(([label, path], i) => <a className={i === 0 ? "active" : ""} href={`/${locale}${path}`} key={label}><span className="rv-nav-glyph">{["⌂","⌕","▤","✳","◉","ⓘ"][i]}</span>{label}{i === 0 ? <i /> : null}</a>)}</nav>
-        <div className="rv-side-bottom"><div className="rv-guest-mark">◌</div><strong>{t.guest}</strong><p>{t.guestText}</p><a href="#" onClick={(e) => { e.preventDefault(); document.querySelector<HTMLButtonElement>(".rv-modal-trigger")?.click(); }}>{t.sign} ↗</a></div>
+        <div className="rv-side-bottom"><div className="rv-guest-mark">◌</div><strong>{t.guest}</strong><p>{t.guestText}</p><a href={`/${locale}/login`}>{t.sign} ↗</a></div>
         <div className="rv-side-language"><a href={`/${ar ? "en" : "ar"}`}>{ar ? "English" : "العربية"}</a><span>© RAVINE</span></div>
       </aside>
 
       <div className="rv-main">
         <header className="rv-topbar">
           <span className="rv-top-context">{ar ? "عالم من الإبداع والمعرفة" : "A universe of creativity & knowledge"}</span>
-          <div><a className="rv-login-link" href="#" onClick={(e) => { e.preventDefault(); document.querySelector<HTMLButtonElement>(".rv-modal-trigger")?.click(); }}>{ar ? "تسجيل الدخول" : "Sign in"}</a><RAVINEControls locale={locale}/></div>
+          <div><a className="rv-login-link" href={`/${locale}/login`}>{ar ? "تسجيل الدخول" : "Sign in"}</a><RAVINEControls locale={locale}/></div>
         </header>
 
         <section className="rv-welcome">
