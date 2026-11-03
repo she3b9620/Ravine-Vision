@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { inviteCreatorTeamMember, respondToCreatorTeamInvitation } from "./actions";
+import { inviteCreatorTeamMember, respondToCreatorTeamInvitation, revokeCreatorTeamInvitation, removeCreatorTeamMember } from "./actions";
 
 export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ error?: string; sent?: string; updated?: string }> };
@@ -35,8 +35,8 @@ export default async function CreatorTeamPage({ params, searchParams }: Props) {
     ? {pending:"بانتظار الرد",accepted:"مقبولة",declined:"مرفوضة",revoked:"ملغاة",expired:"منتهية",active:"نشط",suspended:"موقوف",removed:"أزيل"}
     : {pending:"Pending",accepted:"Accepted",declined:"Declined",revoked:"Revoked",expired:"Expired",active:"Active",suspended:"Suspended",removed:"Removed"};
   const errors: Record<string,string> = ar
-    ? {validation:"تحقق من الهوية الإبداعية ومعرّف الحساب والدور.",invite:"تعذر إرسال الدعوة. تأكد من صحة معرّف الحساب وعدم وجود دعوة معلقة.",response:"تعذر تحديث الدعوة. ربما لم تعد معلقة أو لا تخص حسابك."}
-    : {validation:"Check the creative identity, account ID, and role.",invite:"Could not send the invitation. Check the account ID and pending invitations.",response:"Could not update the invitation. It may no longer be pending or may not belong to you."};
+    ? {validation:"تحقق من الهوية الإبداعية ومعرّف الحساب والدور.",invite:"تعذر إرسال الدعوة. تأكد من صحة معرّف الحساب وعدم وجود دعوة معلقة.",response:"تعذر تحديث الدعوة. ربما لم تعد معلقة أو لا تخص حسابك.",owner_action:"تعذر تنفيذ الإجراء. تحقق من ملكية الهوية وحالة العضو أو الدعوة."}
+    : {validation:"Check the creative identity, account ID, and role.",invite:"Could not send the invitation. Check the account ID and pending invitations.",response:"Could not update the invitation. It may no longer be pending or may not belong to you.",owner_action:"Could not complete the owner action. Check identity ownership and the member or invitation status."};
 
   return <main className="creator-screen" dir={ar ? "rtl" : "ltr"}>
     <header className="creator-header"><Link className="rv-logo" href={"/"+locale}>RAVINE<span>.</span></Link><nav><Link href={"/"+locale+"/creator"}>{ar?"مساحة المبدع":"Creator space"}</Link><Link href={"/"+locale+"/creator/studio"}>{ar?"الاستوديو":"Studio"}</Link><Link href={"/"+locale+"/creator/library"}>{ar?"الأعمال":"Works"}</Link></nav></header>
@@ -66,8 +66,8 @@ export default async function CreatorTeamPage({ params, searchParams }: Props) {
       </section>
       <section className="creator-panel"><h2>{ar?"الفرق والعضويات":"Teams and memberships"}</h2>
         {identities?.length ? identities.map((identity)=><article className="creator-identity" key={identity.id}><h3>{identity.display_name}</h3><span>@{identity.handle}</span>
-          {(memberships ?? []).filter((member)=>member.creator_identity_id===identity.id).map((member)=><p key={member.account_id}>{member.account_id} — {roleLabel[member.role]??member.role} · {statusLabel[member.status]??member.status}</p>)}
-          {(ownedInvitations ?? []).filter((invitation)=>invitation.creator_identity_id===identity.id).map((invitation)=><p key={invitation.id}>{invitation.invited_account_id} — {roleLabel[invitation.role]??invitation.role} · {statusLabel[invitation.status]??invitation.status}</p>)}
+          {(memberships ?? []).filter((member)=>member.creator_identity_id===identity.id).map((member)=><div className="creator-identity" key={member.account_id}><p>{member.account_id} — {roleLabel[member.role]??member.role} · {statusLabel[member.status]??member.status}</p>{member.status==="active"&&<form action={removeCreatorTeamMember} className="creator-team-actions"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="creator_identity_id" value={identity.id}/><input type="hidden" name="member_account_id" value={member.account_id}/><button className="creator-review-reject" type="submit">{ar?"إزالة العضو":"Remove member"}</button></form>}</div>)}
+          {(ownedInvitations ?? []).filter((invitation)=>invitation.creator_identity_id===identity.id).map((invitation)=><div className="creator-identity" key={invitation.id}><p>{invitation.invited_account_id} — {roleLabel[invitation.role]??invitation.role} · {statusLabel[invitation.status]??invitation.status}</p>{invitation.status==="pending"&&<form action={revokeCreatorTeamInvitation} className="creator-team-actions"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="invitation_id" value={invitation.id}/><button className="creator-review-reject" type="submit">{ar?"إلغاء الدعوة":"Revoke invitation"}</button></form>}</div>)}
           {!memberships?.some((member)=>member.creator_identity_id===identity.id) && !ownedInvitations?.some((invitation)=>invitation.creator_identity_id===identity.id) && <p className="creator-muted">{ar?"لا يوجد أعضاء أو دعوات بعد.":"No members or invitations yet."}</p>}
         </article>) : <p className="creator-muted">{ar?"لا توجد هويات إبداعية.":"No creative identities."}</p>}
       </section>
