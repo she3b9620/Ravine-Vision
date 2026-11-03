@@ -17,7 +17,7 @@ const copy = {
     switch: "EN",
   },
   en: {
-    nav: ["Discover", "作品", "Creators", "About RAVINE"],
+    nav: ["Discover", "Works", "Creators", "About RAVINE"],
     eyebrow: "A space for human creativity and knowledge",
     title: "Every work can
 open a path to light.",
