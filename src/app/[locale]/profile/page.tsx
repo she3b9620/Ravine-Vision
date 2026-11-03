@@ -42,6 +42,7 @@ export default async function ProfilePage({ params }: Props) {
             <Link href={"/" + locale + "/works"}>{ar ? "مكتبتي والأعمال" : "My library & works"} <span>↗</span></Link>
             <Link href={"/" + locale + "/communities"}>{ar ? "المجتمعات" : "Communities"} <span>↗</span></Link>
             <Link href={"/" + locale + "/creator"}>{ar ? "مساحة المبدع" : "Creator Space"} <span>↗</span></Link>
+            <Link href={"/" + locale + "/account/progression"}>{ar ? "تطور تصنيف الحساب" : "Account progression"} <span>↗</span></Link>
           </div>
         </section>
         <aside className="profile-card">
