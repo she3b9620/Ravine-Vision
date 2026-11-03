@@ -47,8 +47,8 @@ export default async function CreatorTeamPage({ params, searchParams }: Props) {
       {receivedInvitations?.length ? receivedInvitations.map((invitation)=><article className="creator-identity" key={invitation.id}>
         <strong>{invitation.identity_display_name ?? (ar?"هوية إبداعية":"Creative identity")}</strong>
         <small>{invitation.identity_handle ? "@"+invitation.identity_handle+" · " : ""}{roleLabel[invitation.invited_role] ?? invitation.invited_role}</small>
-        <small>{ar?"تنتهي":"Expires"}: {new Date(invitation.invitation_expires_at).toLocaleString(ar?"ar-EG":"en-GB")}</small>
-        <form action={respondToCreatorTeamInvitation} className="creator-team-actions"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="invitation_id" value={invitation.invitation_id}/><button name="decision" value="accepted" className="creator-submit">{ar?"قبول الدعوة":"Accept"}</button><button name="decision" value="declined" className="creator-review-reject">{ar?"رفض":"Decline"}</button></form>
+        <small>{statusLabel[invitation.invitation_status] ?? invitation.invitation_status} · {ar?"تنتهي":"Expires"}: {new Date(invitation.invitation_expires_at).toLocaleString(ar?"ar-EG":"en-GB")}</small>
+        {invitation.invitation_status === "pending" && <form action={respondToCreatorTeamInvitation} className="creator-team-actions"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="invitation_id" value={invitation.invitation_id}/><button name="decision" value="accepted" className="creator-submit">{ar?"قبول الدعوة":"Accept"}</button><button name="decision" value="declined" className="creator-review-reject">{ar?"رفض":"Decline"}</button></form>}
       </article>) : <p className="creator-muted">{ar?"لا توجد دعوات معلقة.":"No pending invitations."}</p>}
     </section>
 
