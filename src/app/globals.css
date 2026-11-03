@@ -62,3 +62,39 @@ h1 { white-space: pre-line; font-size: clamp(52px, 6.6vw, 92px); line-height: 1.
   .vision { padding: 75px 7vw; grid-template-columns: 1fr; gap: 24px; }
   .footer { padding: 28px 7vw; flex-wrap: wrap; gap: 14px; }
 }
+
+
+/* Locale-prefixed product surfaces */
+.localized-home { min-height: 100vh; padding: 0 7vw; background: radial-gradient(ellipse at 78% 28%, rgba(24,63,70,.22), transparent 38%), var(--ink); }
+.localized-header { min-height: 86px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(241,233,220,.1); }
+.localized-header nav { display: flex; gap: 34px; color: var(--muted); font-size: 13px; }
+.localized-header nav a:hover { color: var(--sand); }
+.locale-switch { border: 1px solid rgba(241,233,220,.25); border-radius: 999px; padding: 10px 16px; font-size: 12px; }
+.localized-hero { max-width: 950px; padding: 130px 0 105px; }
+.localized-hero h1 { max-width: 900px; font-size: clamp(52px, 8vw, 104px); line-height: 1.25; margin: 25px 0; }
+.localized-description { max-width: 650px; color: var(--muted); font-size: 17px; line-height: 2; }
+.localized-actions { display: flex; align-items: center; gap: 28px; margin-top: 38px; }
+.domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 30px 0 110px; }
+.domain-card { min-height: 220px; padding: 28px; border: 1px solid rgba(241,233,220,.12); background: rgba(21,23,25,.55); }
+.domain-card > span { color: var(--copper); font: 11px "DM Sans", sans-serif; letter-spacing: .16em; }
+.domain-card h2 { font-size: 23px; font-weight: 500; margin: 42px 0 12px; }
+.domain-card p { color: var(--muted); font-size: 14px; line-height: 1.9; }
+.localized-footer { min-height: 90px; display: flex; justify-content: space-between; align-items: center; gap: 20px; border-top: 1px solid rgba(241,233,220,.1); color: var(--muted); font-size: 11px; }
+.localized-footer span:first-child { font: 10px "DM Sans", sans-serif; letter-spacing: .16em; }
+.simple-page { min-height: 100vh; max-width: 1100px; margin: auto; padding: 9vh 7vw; }
+.back-link { display: inline-block; color: var(--muted); margin-bottom: 90px; font-size: 13px; }
+.simple-page h1 { max-width: 900px; font-size: clamp(44px, 7vw, 82px); line-height: 1.35; }
+.simple-page > p:not(.eyebrow) { max-width: 760px; color: var(--muted); font-size: 17px; line-height: 2; }
+.coming-note { display: inline-block; margin-top: 35px; color: var(--sand); font-size: 12px; }
+@media (max-width: 760px) {
+  .localized-home { padding: 0 6vw; }
+  .localized-header { min-height: 72px; }
+  .localized-header nav { display: none; }
+  .localized-hero { padding: 90px 0 75px; }
+  .localized-hero h1 { font-size: clamp(46px, 13vw, 68px); }
+  .localized-description { font-size: 14px; }
+  .domain-grid { grid-template-columns: 1fr; padding-bottom: 75px; }
+  .domain-card { min-height: 175px; }
+  .domain-card h2 { margin-top: 25px; }
+  .localized-footer { align-items: flex-start; flex-direction: column; justify-content: center; padding: 24px 0; }
+}
