@@ -53,7 +53,7 @@ export default async function CreatorTeamPage({ params, searchParams }: Props) {
     {query.updated && <p className="creator-alert success" role="status">{ar?"تم تحديث حالة الدعوة.":"Invitation updated."}</p>}
 
     <section className="creator-panel creator-team-section"><h2>{ar?"دعوات واردة إليك":"Invitations to you"}</h2>
-      {receivedInvitations?.length ? receivedInvitations.map((invitation)=><article className="creator-identity" key={invitation.id}>
+      {receivedInvitations?.length ? receivedInvitations.map((invitation)=><article className="creator-identity" key={invitation.invitation_id}>
         <strong>{invitation.identity_display_name ?? (ar?"هوية إبداعية":"Creative identity")}</strong>
         <small>{invitation.identity_handle ? "@"+invitation.identity_handle+" · " : ""}{roleLabel[invitation.invited_role] ?? invitation.invited_role}</small>
         <small>{statusLabel[invitation.invitation_status] ?? invitation.invitation_status} · {ar?"تنتهي":"Expires"}: {new Date(invitation.invitation_expires_at).toLocaleString(ar?"ar-EG":"en-GB")}</small>
