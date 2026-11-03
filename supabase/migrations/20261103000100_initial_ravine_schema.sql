@@ -124,8 +124,7 @@ create table public.follows (
   follower_account_id uuid not null references public.profiles(id) on delete cascade,
   followed_creator_identity_id uuid not null references public.creator_identities(id) on delete cascade,
   created_at timestamptz not null default now(),
-  primary key(follower_account_id, followed_creator_identity_id),
-  check (follower_account_id <> (select owner_account_id from public.creator_identities where id = followed_creator_identity_id))
+  primary key(follower_account_id, followed_creator_identity_id)
 );
 
 create table public.work_reactions (
