@@ -240,3 +240,9 @@ h1 { white-space: pre-line; font-size: clamp(52px, 6.6vw, 92px); line-height: 1.
 .creator-review-reject{min-height:44px;padding:10px 16px;border:1px solid #c47a52;background:transparent;color:#d49a78;border-radius:7px;font:inherit;cursor:pointer}
 .creator-review-reject:hover{background:#c47a521a}
 @media(max-width:640px){.creator-review-form{grid-template-columns:1fr}}
+
+
+.creator-team-section{margin-bottom:20px}
+.creator-team-columns{margin-top:20px}
+.creator-team-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.creator-team-actions button{min-width:110px;justify-content:center}
