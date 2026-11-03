@@ -220,7 +220,7 @@ alter table public.audit_events enable row level security;
 create policy "Profiles are visible when discoverable" on public.profiles
 for select to anon, authenticated using (discoverable or id = (select auth.uid()));
 create policy "Accounts create their own profile" on public.profiles
-for insert to authenticated with check (id = (select auth.uid()));
+for insert to authenticated with check (id = (select auth.uid()) and account_tier = 'viewer');
 create policy "Accounts update their own profile" on public.profiles
 for update to authenticated using (id = (select auth.uid())) with check (id = (select auth.uid()));
 
@@ -234,7 +234,7 @@ for update to authenticated using (owner_account_id = (select auth.uid())) with 
 create policy "Published public works are discoverable" on public.works
 for select to anon, authenticated using ((status = 'published' and visibility = 'public') or created_by = (select auth.uid()));
 create policy "Owners create works" on public.works
-for insert to authenticated with check (created_by = (select auth.uid()) and exists (select 1 from public.creator_identities c where c.id = creator_identity_id and c.owner_account_id = (select auth.uid())));
+for insert to authenticated with check (created_by = (select auth.uid()) and status = 'draft' and exists (select 1 from public.creator_identities c where c.id = creator_identity_id and c.owner_account_id = (select auth.uid())));
 create policy "Owners update works" on public.works
 for update to authenticated using (created_by = (select auth.uid())) with check (created_by = (select auth.uid()));
 
@@ -304,9 +304,19 @@ create policy "Accounts view own audit events" on public.audit_events
 for select to authenticated using (actor_account_id = (select auth.uid()));
 
 -- Explicit Data API grants: new Supabase projects no longer auto-expose public tables.
+-- Column grants prevent clients from changing account tier, review state, media processing state,
+-- ledger entries, payout outcomes, or moderation decisions.
 grant select on public.profiles, public.creator_identities, public.works, public.work_media, public.communities, public.follows, public.work_reactions, public.work_comments to anon, authenticated;
-grant insert, update on public.profiles, public.creator_identities, public.works, public.media_assets, public.work_comments to authenticated;
-grant select, insert, update, delete on public.work_media, public.follows, public.work_reactions to authenticated;
-grant select, insert on public.rights_declarations, public.safety_reports, public.payout_requests to authenticated;
+grant insert on public.profiles to authenticated;
+grant update (handle, display_name, bio, avatar_asset_id, preferred_locale, discoverable, updated_at) on public.profiles to authenticated;
+grant insert on public.creator_identities to authenticated;
+grant update (display_name, handle, biography, discipline_tags, updated_at) on public.creator_identities to authenticated;
+grant insert on public.works to authenticated;
+grant update (title, synopsis, kind, language_code, visibility, thumbnail_asset_id, updated_at) on public.works to authenticated;
+grant select, insert on public.media_assets to authenticated;
+grant insert, update, delete on public.work_media, public.follows, public.work_reactions to authenticated;
+grant select, insert on public.rights_declarations, public.safety_reports to authenticated;
 grant select on public.media_assets, public.rights_declarations, public.community_memberships, public.economic_ledger, public.payout_requests, public.audit_events to authenticated;
 grant insert, update on public.communities, public.community_memberships to authenticated;
+grant insert on public.work_comments to authenticated;
+grant update (body, updated_at) on public.work_comments to authenticated;
