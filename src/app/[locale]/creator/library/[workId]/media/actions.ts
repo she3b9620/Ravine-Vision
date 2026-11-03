@@ -14,7 +14,7 @@ export async function registerMediaIntent(formData:FormData){
  const kind=String(formData.get("asset_kind")??"");
  const mime=String(formData.get("mime_type")??"").toLowerCase();
  const bytes=Number(formData.get("byte_size")??0);
- const base="/"+locale+"/creator/library/"+workId+"/media";
+ const base="/"+locale+"/creator/library/"+encodeURIComponent(workId)+"/media";
  if(!workId||!allowed[kind]?.includes(mime)||!Number.isSafeInteger(bytes)||bytes<1||bytes>5*1024*1024*1024) redirect(base+"?error=validation");
  const supabase=await createClient();
  const {data:{user}}=await supabase.auth.getUser();
