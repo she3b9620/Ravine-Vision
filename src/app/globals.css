@@ -335,3 +335,23 @@ html[data-theme="light"] .rv-email-auth-link{color:#151719;border-color:#1517194
 @keyframes rv-modal-in{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:760px){.rv-global-controls{margin-inline-end:5px}.rv-modal-trigger{padding:11px 12px;font-size:11px}.rv-auth-modal{padding-top:44px}}
 @media(prefers-reduced-motion:reduce){.rv-auth-backdrop,.rv-auth-modal{animation:none!important}}
+
+
+/* Signed-in member universe: distinct from guest discovery */
+.rv-member-shell .rv-sidebar{background:#101416;border-inline-end:1px solid #ffffff18}
+.rv-member-side-card{margin:24px 18px;padding:17px;border:1px solid #ffffff20;background:#151b1d;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.rv-member-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#183f46;color:#f1e9dc;font-size:18px}
+.rv-member-side-card strong{font-size:13px}.rv-member-side-card small{color:#d49a78;font-size:10px}.rv-member-side-card a,.rv-member-account-link{font-size:11px;color:#d49a78;margin-top:8px}
+.rv-member-email{font-size:10px;color:#aaa;margin-inline-end:18px}
+.rv-member-welcome{padding:76px clamp(24px,6vw,90px) 68px;background:radial-gradient(ellipse at 80% 20%,#183f464d,transparent 55%),linear-gradient(120deg,#0b0f10,#111719);border-bottom:1px solid #ffffff18}
+.rv-member-welcome h1{font-size:clamp(36px,5vw,66px);margin:18px 0;line-height:1.35}
+.rv-member-welcome>p:not(.rv-kicker){max-width:680px;color:#c9c3b9;font-size:14px;line-height:2;margin-bottom:28px}
+.rv-member-block{padding-top:55px}
+.rv-member-principle{margin:20px clamp(24px,6vw,90px) 75px;padding:38px;border-inline-start:2px solid #c47a52;background:#151719}
+.rv-member-principle>span{font:10px "DM Sans",sans-serif;letter-spacing:.16em;color:#d49a78}
+.rv-member-principle h2{font-size:clamp(24px,3vw,38px);font-weight:500;line-height:1.5;max-width:750px}
+.rv-member-principle p{font-size:13px;line-height:2;color:#bdb6ac;max-width:720px}
+html[data-theme="light"] .rv-member-shell .rv-sidebar{background:#f7f2e9}
+html[data-theme="light"] .rv-member-side-card,html[data-theme="light"] .rv-member-principle{background:#fffaf2;border-color:#15171920;color:#151719}
+html[data-theme="light"] .rv-member-welcome{background:linear-gradient(120deg,#f1e9dc,#e8ded0)}
+html[data-theme="light"] .rv-member-welcome>p:not(.rv-kicker),html[data-theme="light"] .rv-member-principle p{color:#554c43}
