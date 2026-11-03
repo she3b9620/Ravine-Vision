@@ -1,0 +1,26 @@
+import {notFound,redirect} from "next/navigation";
+import Link from "next/link";
+import {createClient} from "@/lib/supabase/server";
+import {reviewItem} from "./actions";
+export const dynamic="force-dynamic";
+type Props={params:Promise<{locale:string}>;searchParams:Promise<{done?:string;error?:string}>};
+export default async function ReviewConsole({params,searchParams}:Props){
+ const {locale}=await params;const query=await searchParams;
+ if(locale!=="ar"&&locale!=="en")notFound();const ar=locale==="ar";
+ const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/"+locale+"/login");
+ const {data:role}=await supabase.rpc("current_staff_role");
+ if(!role||!["reviewer","moderator","admin","owner"].includes(role))notFound();
+ const canReview=["reviewer","admin","owner"].includes(role);
+ const [{data:applications},{data:rights}]=canReview?await Promise.all([
+  supabase.from("creator_applications").select("id,creator_identity_id,applicant_account_id,statement,status,submitted_at").in("status",["submitted","under_review"]).order("submitted_at",{ascending:true}).limit(50),
+  supabase.from("rights_declarations").select("id,work_id,claimant_account_id,declaration,attribution_text,license_reference,evidence_references,review_status,created_at").in("review_status",["unreviewed","under_review"]).order("created_at",{ascending:true}).limit(50)
+ ]):[{data:[]},{data:[]}];
+ return <main className="creator-screen" dir={ar?"rtl":"ltr"}>
+ <header className="creator-header"><Link className="rv-logo" href={"/"+locale}>RAVINE<span>.</span></Link><nav><span>{ar?"لوحة المراجعة":"Review console"}</span></nav></header>
+ <section className="creator-intro"><p className="rv-eyebrow"><i/>TRUST & REVIEW</p><h1>{ar?"المراجعة والمساءلة.":"Review & accountability."}</h1><p>{ar?"لوحة داخلية للمراجعين المخولين. كل قرار يُنفّذ عبر إجراء محمي ويُسجّل في سجل التدقيق.":"An internal console for authorized reviewers. Every decision runs through a protected operation and is recorded in the audit log."}</p><small>{ar?"الدور الحالي":"Current role"}: {role}</small></section>
+ {query.done&&<p className="creator-alert success" role="status">{ar?"تم تسجيل القرار.":"Decision recorded."}</p>}
+ {query.error&&<p className="creator-alert" role="alert">{ar?"تعذر تنفيذ القرار. راجع الصلاحية والحالة.":"The decision could not be completed. Check permissions and status."}</p>}
+ {canReview&&<><section className="creator-panel"><h2>{ar?"طلبات المبدعين":"Creator applications"} ({applications?.length??0})</h2>{applications?.length?applications.map(item=><article className="creator-identity" key={item.id}><strong>{ar?"طلب انضمام":"Creator application"}</strong><small>{item.id} · {item.status}</small><p>{item.statement}</p><form action={reviewItem} className="creator-review-form"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="kind" value="creator_application"/><input type="hidden" name="item_id" value={item.id}/><label>{ar?"ملاحظات داخلية (اختياري)":"Internal notes (optional)"}<textarea name="notes" maxLength={4000} rows={2}/></label><button name="decision" value="approved" className="creator-submit">{ar?"قبول الهوية":"Approve identity"}</button><button name="decision" value="rejected" className="creator-review-reject">{ar?"رفض الطلب":"Reject application"}</button></form></article>):<p className="creator-muted">{ar?"لا توجد طلبات تنتظر المراجعة.":"No applications awaiting review."}</p>}</section>
+ <section className="creator-panel"><h2>{ar?"إقرارات الحقوق":"Rights declarations"} ({rights?.length??0})</h2>{rights?.length?rights.map(item=><article className="creator-identity" key={item.id}><strong>{item.declaration.replaceAll("_"," ")}</strong><small>{item.id} · {item.review_status} · Work {item.work_id}</small>{item.attribution_text&&<p>{item.attribution_text}</p>}{item.license_reference&&<p>{item.license_reference}</p>}{item.evidence_references?.map((ref:string)=><p key={ref}>{ref}</p>)}<form action={reviewItem} className="creator-review-form"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="kind" value="rights_declaration"/><input type="hidden" name="item_id" value={item.id}/><label>{ar?"ملاحظات داخلية (اختياري)":"Internal notes (optional)"}<textarea name="notes" maxLength={4000} rows={2}/></label><button name="decision" value="accepted" className="creator-submit">{ar?"قبول الإقرار":"Accept declaration"}</button><button name="decision" value="disputed" className="creator-review-reject">{ar?"اعتراض":"Dispute"}</button><button name="decision" value="rejected" className="creator-review-reject">{ar?"رفض":"Reject"}</button></form></article>):<p className="creator-muted">{ar?"لا توجد إقرارات تنتظر المراجعة.":"No declarations awaiting review."}</p>}</section></>}
+ </main>;
+}
