@@ -219,3 +219,14 @@ h1 { white-space: pre-line; font-size: clamp(52px, 6.6vw, 92px); line-height: 1.
 .creator-alert.success{border-color:#3c7465;background:#12221e;color:#b6dfd1}
 .creator-disclaimer{max-width:900px;color:#8f918d;font-size:12px;line-height:1.9;margin-top:26px}
 @media(max-width:800px){.creator-columns{grid-template-columns:1fr}.creator-header nav{gap:12px;font-size:11px}}
+
+
+.creator-form select{width:100%;min-height:46px;background:#0d0f10;border:1px solid #ffffff26;border-radius:7px;padding:12px;color:#f1e9dc;font:inherit;outline:none}
+.creator-form select:focus{border-color:#c47a52}
+.creator-library-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px}
+.creator-library-heading h2{margin:0}
+.creator-library-heading h2 span{font-size:13px;color:#d49a78}
+.creator-library-heading>a{color:#d49a78;text-decoration:none;font-size:13px}
+.creator-work-list{display:grid;gap:0}
+.creator-work-list .creator-identity>div{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
+.creator-work-list .creator-identity>div small{color:#d49a78}
