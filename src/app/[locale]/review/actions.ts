@@ -18,6 +18,8 @@ export async function reviewItem(formData:FormData){
   result=await supabase.rpc("review_creator_application",{p_application_id:id,p_decision:decision,p_notes:notes||null});
  }else if(kind==="rights_declaration"&&["reviewer","admin","owner"].includes(role)&&["accepted","disputed","rejected"].includes(decision)){
   result=await supabase.rpc("review_rights_declaration",{p_declaration_id:id,p_decision:decision,p_notes:notes||null});
+ }else if(kind==="safety_report"&&["moderator","admin","owner"].includes(role)&&["triaged","actioned","dismissed","appealed"].includes(decision)){
+  result=await supabase.rpc("review_safety_report",{p_report_id:id,p_decision:decision,p_notes:notes||null});
  }else redirect("/"+locale+"/review?error=permission");
  if(result.error)redirect("/"+locale+"/review?error=save");
  redirect("/"+locale+"/review?done=1");
