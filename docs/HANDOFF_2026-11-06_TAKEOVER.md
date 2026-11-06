@@ -17,6 +17,9 @@
    على Google Fonts الخارجي.
 3. **إصلاح خلل مُثبت**: الصفحة الرئيسية كانت تُرجع **500** عند غياب متغيرات
    Supabase. الآن تُرجع **200** (تم البناء والاختبار فعليًا بدون المتغيرات).
+4. **سلامة أسطح الاكتشاف**: فحص كل المسارات (43 مسارًا) — **صفر أخطاء 5xx** —
+   وأُزيلت روابط ميتة (404) وأرقام نشاط ملفّقة وأزرار «انضم» لا تعمل،
+   وأصبح `?category=` في الاكتشاف يعمل فعليًا، مع 6 اختبارات تحمي ذلك.
 
 **غير منشور:** لم يتم Push ولم يتم Deploy، لأن Push على هذا الفرع يشغّل
 Preview Deployment تلقائيًا عبر تكامل Vercel.
@@ -71,7 +74,7 @@ should be added to the client.
 |---|---|---|
 | `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
 | Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
-| Local HEAD after | `fbe86cd` | `feat(brand): integrate official RAVINE wordmark and self-hosted Avenir Arabic` |
+| Local HEAD after | `43dc5dc` | `fix(discovery): remove dead links and fabricated activity from public sections` |
 
 Two local commits were already ahead of `origin` when the session started
 (`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
@@ -84,7 +87,7 @@ Two local commits were already ahead of `origin` when the session started
 |---|---|---|---|
 | Production build | `npm run build` | ✅ 39 routes, Next.js 16.4.5 (Turbopack) | ✅ 40 routes (+`/icon.png`) |
 | Lint | `npx eslint .` | ⚠️ 1 warning (`empty-state.tsx`: unused `locale`) | ✅ **0 problems** |
-| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ 1 file / 2 tests passed |
+| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **2 files / 8 tests passed** |
 
 ---
 
@@ -163,6 +166,63 @@ on the root element, which also fixes bidi rendering of the empty state.
 `src/components/member-home.tsx`; `src/components/empty-state.tsx`;
 `public/brand/*` (6 images); `public/fonts/avenir-arabic-*.otf` (6 fonts);
 `src/app/icon.png`.
+
+---
+
+## 5b. Round 2 — full route verification and public-surface integrity
+
+### Route sweep (evidence, not inspection)
+
+Every page route was derived from the app directory and fetched from a real
+production build served with the real Supabase environment. All 43 concrete
+paths (`ar` + `en`) were probed with redirects disabled:
+
+| Result | Count |
+|---|---|
+| `200` public pages | 16 |
+| `307` → correct `/login` redirect | 27 |
+| `5xx` or Next error pages | **0** |
+
+Public 200s: `/`, `/ar`, `/en`, about ×2, communities ×2, creators ×2,
+discover ×2, works ×2, login ×2, creator/community ×2.
+
+`/creator/community` is public by design — it renders `SectionPlaceholder`
+with no data access and no actions.
+
+**Detector correction:** an initial run flagged `__next_error__` on the 307
+bodies. That is Next.js's redirect response shell, not a failure. The check now
+only applies to 2xx bodies; the corrected run shows zero defects.
+
+### Verified defects found by probing, then fixed (commit `43dc5dc`)
+
+| Defect | Evidence before | After |
+|---|---|---|
+| Works/Creators/Communities cards linked to routes that do not exist | `/ar/works/1` → **404**, `/ar/creators/1` → **404**, `/ar/communities/1` → **404** | 0 detail-route links on all three pages |
+| Invented activity numbers | `worksCount: 5 / 12`, `membersCount: 42 / 28` rendered as fact | removed entirely |
+| Dead "Join" action | "انضم →" on a non-navigable card | removed |
+| Fake "published" status on examples | `status: "published"` badge | removed |
+| `/discover?category=` silently ignored | `?category=cinema` → still showed "All worlds" | server-side parse; deep link renders the right world |
+
+Deep-link behaviour now measured over HTTP:
+
+```
+/ar/discover                  => 200  active-tab='كل العوالم'
+/ar/discover?category=cinema  => 200  active-tab='السينما والصورة'
+/ar/discover?category=audio   => 200  active-tab='الصوت والحوار'
+/ar/discover?category=bogus   => 200  active-tab='كل العوالم'
+```
+
+Sample cards stay for design review but are now non-interactive `<article>`
+elements with a visible "Example / مثال توضيحي" badge, neutralised hover and
+cursor, and no invented figures — consistent with the charter rule that demo
+content must never present itself as real.
+
+`/discover` changed from static (`●`) to dynamic (`ƒ`). That is accurate: its
+content now depends on the URL.
+
+Six new regression tests (`src/app/discovery-integrity.test.tsx`) assert no
+dead detail links, no fabricated counters, no dead CTA, correct deep-link
+selection, unknown-category fallback, and URL write-back on tab change.
 
 ---
 
