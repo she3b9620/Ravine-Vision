@@ -89,7 +89,7 @@ should be added to the client.
 |---|---|---|
 | `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
 | Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
-| Local HEAD after | `cc6a811` | `test(db): enforce the migration contract without a live database` |
+| Local HEAD after | `8a1317d` | `feat(ux): branded 404 and error boundaries in both languages` |
 
 Two local commits were already ahead of `origin` when the session started
 (`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
@@ -102,7 +102,7 @@ Two local commits were already ahead of `origin` when the session started
 |---|---|---|---|
 | Production build | `npm run build` | ✅ 39 routes, Next.js 16.4.5 (Turbopack) | ✅ 40 routes (+`/icon.png`) |
 | Lint | `npx eslint .` | ⚠️ 1 warning (`empty-state.tsx`: unused `locale`) | ✅ **0 problems** |
-| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **6 files / 29 tests passed** |
+| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **7 files / 32 tests passed** |
 
 ---
 
@@ -537,6 +537,50 @@ run with `npm test`, no database required:
 The guard was mutation-tested: injecting a `.from("definitely_missing_table")`
 call makes check 1 fail with a precise message, and removing it restores green.
 A guard that cannot fail would be worthless.
+
+---
+
+## 5j. Round 9 — branded error boundaries, and a regression caught and reverted
+
+### Gap: 28 `notFound()` calls, no boundary files
+
+The app had **no `not-found.tsx`, `error.tsx` or `loading.tsx`** anywhere, yet it
+calls `notFound()` in 28 places — invalid locales, bad URLs, and the review
+console hiding itself from non-staff accounts. All of those rendered Next's
+default page: unbranded, English-only, and RTL-agnostic.
+
+Added (commit `8a1317d`):
+
+- `src/app/not-found.tsx` — root boundary; also serves invalid locales, because
+  `notFound()` thrown inside the `[locale]` layout is handled by the parent;
+- `src/app/[locale]/not-found.tsx` — for `notFound()` raised by a page;
+- `src/app/[locale]/error.tsx` — segment error boundary with retry. It does not
+  render `error.message` or the digest, which could disclose internals;
+- `src/components/route-state.tsx` — one shared bilingual screen (Arabic first,
+  RTL, links into both locales) + CSS + 3 component tests.
+
+Verified: `/ar/does-not-exist`, `/en/does-not-exist`, `/xx/anything` and
+`/totally/unknown` all return **HTTP 404** with the branded bilingual page.
+
+Not verified (needs a session): the `[locale]` not-found reaching a page-level
+`notFound()`, and the error boundary firing on a real exception. Both are
+compiled into the output, but claiming them "tested" would be dishonest.
+
+### Regression introduced and reverted: `[locale]/loading.tsx`
+
+A loading skeleton was built for the locale segment. It was measured immediately,
+and it **broke authentication redirects**: with a Suspense boundary above the
+page, `/ar/profile` answered `HTTP 200` with the skeleton and deferred the
+redirect into the stream. The crawl went from
+
+```
+16×200, 27×307, 0×5xx     →     42×200, 1×307, 0×5xx
+```
+
+Deleting the file restored the exact previous distribution. Its skeleton CSS was
+removed too. A loading boundary can return later, but only after the session
+check moves into the proxy so redirects resolve before streaming — recorded here
+so the mistake is not repeated.
 
 ---
 
