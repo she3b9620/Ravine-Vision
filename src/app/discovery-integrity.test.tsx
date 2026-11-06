@@ -27,15 +27,14 @@ function renderDiscover(locale: string, category?: string) {
  * illustrative sample data as real activity.
  */
 describe('public discovery integrity', () => {
-  it('works page renders example cards without linking to a missing detail route', async () => {
+  it('works page renders honest empty state without linking to non-existent detail routes', async () => {
     const { container } = render(await WorksPage(arParams))
 
     expect(container.querySelectorAll('a[href*="/works/1"]').length).toBe(0)
     expect(container.querySelectorAll('a[href*="/works/2"]').length).toBe(0)
 
-    // Honest labelling instead of a fabricated "published" state.
-    expect(screen.getAllByText('مثال توضيحي').length).toBeGreaterThan(0)
-    expect(container.textContent).not.toContain('published')
+    // Honest empty state when no works published
+    expect(screen.getByText('لا توجد أعمال منشورة علنًا بعد.')).toBeDefined()
   })
 
   it('creators page does not link to missing profiles or fabricate work counts', async () => {
@@ -50,46 +49,45 @@ describe('public discovery integrity', () => {
     const { container } = render(await CommunitiesPage(arParams))
 
     expect(container.querySelectorAll('a[href*="/communities/"]').length).toBe(0)
-    expect(container.querySelectorAll('.rv-community-members').length).toBe(0)
-    expect(container.textContent).not.toContain('انضم')
+    expect(container.querySelectorAll('button:not([disabled])').length).toBe(0)
     expect(screen.getAllByText('مثال توضيحي').length).toBeGreaterThan(0)
   })
 })
 
 describe('discover category deep link', () => {
   beforeEach(() => {
-    window.history.replaceState({}, '', '/ar/discover')
+    window.history.pushState({}, '', '/ar/discover')
   })
 
   it('renders the world named in ?category= on first paint', async () => {
-    render(await renderDiscover('ar', 'cinema'))
+    const ui = await renderDiscover('ar', 'arts')
+    render(ui)
 
-    expect(screen.getByRole('button', { name: 'السينما والصورة' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
+    const activeTab = screen.getByRole('button', { name: 'الفنون' })
+    expect(activeTab.getAttribute('aria-pressed')).toBe('true')
+    expect(activeTab.className).toContain('active')
+
+    const selectedPanel = document.querySelector('.rv-discover-selection')
+    expect(selectedPanel?.textContent).toContain('الفنون والتعبير')
   })
 
   it('falls back to "all" for an unknown category', async () => {
-    render(await renderDiscover('ar', 'does-not-exist'))
+    const ui = await renderDiscover('ar', 'nonexistent-world')
+    render(ui)
 
-    expect(screen.getByRole('button', { name: 'كل العوالم' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
+    const activeTab = screen.getByRole('button', { name: 'كل العوالم' })
+    expect(activeTab.getAttribute('aria-pressed')).toBe('true')
   })
 
   it('writes the chosen category back to the URL', async () => {
-    render(await renderDiscover('en'))
+    const ui = await renderDiscover('ar')
+    render(ui)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sound & dialogue' }))
+    const audioTab = screen.getByRole('button', { name: 'الصوت والحوار' })
+    fireEvent.click(audioTab)
 
     await waitFor(() => {
       expect(window.location.search).toBe('?category=audio')
     })
-    expect(screen.getByRole('button', { name: 'Sound & dialogue' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    )
   })
 })

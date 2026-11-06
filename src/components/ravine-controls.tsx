@@ -28,7 +28,7 @@ export default function RAVINEControls({ locale, googleEnabled = false }: { loca
   return <>
     <div className="rv-global-controls">
       <button type="button" onClick={switchLocale} aria-label={ar ? "تغيير اللغة" : "Change language"}>{ar ? "EN" : "عربي"}</button>
-      <button type="button" onClick={toggleTheme} aria-label={ar ? "تغيير وضع العرض" : "Toggle appearance"}>{light ? "☾" : "☼"}</button>
+      <button type="button" onClick={toggleTheme} aria-label={ar ? "تغيير وضع العرض" : "Toggle appearance"}><span className="rv-theme-glyph rv-theme-sun">☼</span><span className="rv-theme-glyph rv-theme-moon">☾</span></button>
     </div>
     <button type="button" className="rv-modal-trigger" onClick={() => setOpen(true)}>{ar ? "إنشاء حساب" : "Create account"}</button>
     {open && <div className="rv-auth-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>

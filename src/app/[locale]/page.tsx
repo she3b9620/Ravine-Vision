@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import RAVINEControls from "@/components/ravine-controls";
+import RAVINEOpenAuth from "@/components/open-auth-link";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import { getAuthProviders } from "@/lib/auth-providers";
@@ -27,54 +28,56 @@ const content = {
     communities: "اكتشف المجتمعات",
     live: "حضور حيّ، بالصوت أو بالصورة",
     liveText: "حوارات وتجارب مباشرة تتيح المشاركة وفق إعدادات كل مساحة.",
-    creator: "لكل مبدع عالمه",
-    creatorText: "مساحة مهنية مستقلة لإدارة الهويات والأعمال والمشروعات والفريق والمجتمع، ومتابعة فرص الاستدامة والربح بشفافية.",
-    creatorCta: "ادخل مساحة المبدع",
-    sign: "إنشاء حساب",
+    creator: "لكل صاحب رؤية أو تجربة أو عمل إبداعي",
+    creatorText: "مساحة مهنية لإدارة أعمالك، بناء هويتك، والتواصل مع جمهور يقدر ما تقدمه.",
+    creatorCta: "مساحة المبدع",
     footer: "الكرامة · الإبداع · المعرفة · التقارب الإنساني",
-    sideLabel: "عالمك في رافين",
-    guest: "تتصفح الآن كزائر",
-    guestText: "يمكنك استكشاف رافين قبل إنشاء حساب. التفاعل الكامل يبدأ بعد التسجيل."
+    sideLabel: "المسارات",
+    guest: "حساب زائر",
+    guestText: "تصفح بحرية. أنشئ حسابًا عندما تود المشاركة والحفظ.",
+    sign: "تسجيل الدخول",
   },
   en: {
     nav: [["Home",""],["Discover","/discover"],["Works","/works"],["Creators","/creators"],["Communities","/communities"],["About","/about"]],
-    greeting: "A space for human creativity and knowledge",
-    title: "What deserves to be seen, deserves to remain.",
-    intro: "Explore worlds of creativity, knowledge, and human experience. Watch, meet the people behind the work, and understand its context before joining RAVINE.",
-    explore: "Start exploring",
-    about: "Our story",
-    featured: "Worlds worth discovering",
-    featuredText: "RAVINE is not limited to a single form of expression.",
-    lanes: [["Cinema & image","Films, documentaries, and the moving image","/works","01"],["Sound & conversation","Podcasts, stories, and audio spaces","/discover","02"],["Arts & expression","Photography, music, and visual arts","/discover","03"],["Knowledge & thought","Books, research, lectures, and ideas","/discover","04"]],
-    works: "Across RAVINE",
-    worksText: "A space for works, ideas, and experiences—not just view counts.",
+    greeting: "A space for human creativity & knowledge",
+    title: "What deserves to be seen, deserves to last.",
+    intro: "Discover universes of human creativity, knowledge, and experience. Watch, get to know the creators, and understand their context before joining RAVINE.",
+    explore: "Begin exploring",
+    about: "About RAVINE",
+    featured: "Paths worth discovering",
+    featuredText: "RAVINE does not reduce human expression to a single medium.",
+    lanes: [["Cinema & Image","Film, documentary, and visual storytelling","/works","01"],["Audio & Dialogue","Podcasts, oral histories, and audio spaces","/discover","02"],["Arts & Expression","Photography, music, and visual arts","/discover","03"],["Knowledge & Thought","Books, research, lectures, and ideas","/discover","04"]],
+    works: "From the RAVINE universes",
+    worksText: "A home for works, ideas, and human experiences—not just view counts.",
     all: "Explore works",
-    community: "Meaning grows through participation",
-    communityText: "Join communities shaped around interests, questions, and creative work.",
+    community: "Meaning deepens through connection",
+    communityText: "Join communities formed around shared questions, arts, and works. Connect with the voices behind them.",
     communities: "Discover communities",
-    live: "Live presence, audio or video",
-    liveText: "Live conversations and experiences with participation shaped by each space.",
-    creator: "Every creator has a universe",
-    creatorText: "A dedicated professional space to manage identities, work, projects, teams, and communities—and understand sustainable earning opportunities transparently.",
-    creatorCta: "Enter Creator Space",
-    sign: "Create account",
+    live: "Live presence, audio or visual",
+    liveText: "Real-time conversations and experiences shaped by each space's terms.",
+    creator: "For every vision, story, or body of creative work",
+    creatorText: "A professional space to steward your works, shape your identity, and connect with an audience that values depth.",
+    creatorCta: "Creator space",
     footer: "Dignity · Creativity · Knowledge · Human connection",
-    sideLabel: "Your RAVINE",
-    guest: "Browsing as a guest",
-    guestText: "Explore RAVINE before creating an account. Full participation begins after signup."
-  }
-} as const;
+    sideLabel: "EXPLORE",
+    guest: "Guest preview",
+    guestText: "Browse freely. Create an account whenever you want to save, respond, and connect.",
+    sign: "Sign in",
+  },
+};
 
-export default async function LocalizedHome({ params }: { params: Promise<{ locale: string }> }) {
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function LocalizedHome({ params }: Props) {
   const { locale } = await params;
-  if (locale !== "ar" && locale !== "en") notFound();
-
-  // The public guest experience must render even when the backend is not
-  // configured or is temporarily unreachable. Only the signed-in branch needs
-  // Supabase, so a missing/failed backend degrades to the guest shell instead
-  // of failing the whole page (previously a hard 500).
+  if (locale !== "ar" && locale !== "en") {
+    notFound();
+  }
   let user: User | null = null;
-  if (getSupabaseEnvironment()) {
+  const env = getSupabaseEnvironment();
+  if (env) {
     try {
       const supabase = await createClient();
       const { data } = await supabase.auth.getUser();
@@ -94,14 +97,14 @@ export default async function LocalizedHome({ params }: { params: Promise<{ loca
         <a className="rv-brand" href={`/${locale}`} aria-label="RAVINE home"><span className="rv-brand-lockup"><i className="rv-brand-wordmark" role="img" aria-label="RAVINE" /><small>THE PATH TO LIGHT</small></span></a>
         <p className="rv-side-label">{t.sideLabel}</p>
         <nav className="rv-side-nav">{t.nav.map(([label, path], i) => <a className={i === 0 ? "active" : ""} href={`/${locale}${path}`} key={label}><span className="rv-nav-glyph">{["⌂","⌕","▤","✳","◉","ⓘ"][i]}</span>{label}{i === 0 ? <i /> : null}</a>)}</nav>
-        <div className="rv-side-bottom"><div className="rv-guest-mark">◌</div><strong>{t.guest}</strong><p>{t.guestText}</p><a href={`/${locale}/login`}>{t.sign} ↗</a></div>
+        <div className="rv-side-bottom"><div className="rv-guest-mark">◌</div><strong>{t.guest}</strong><p>{t.guestText}</p><RAVINEOpenAuth>{t.sign} ↗</RAVINEOpenAuth></div>
         <div className="rv-side-language"><a href={`/${ar ? "en" : "ar"}`}>{ar ? "English" : "العربية"}</a><span>© RAVINE</span></div>
       </aside>
 
       <div className="rv-main">
         <header className="rv-topbar">
           <span className="rv-top-context">{ar ? "عالم من الإبداع والمعرفة" : "A universe of creativity & knowledge"}</span>
-          <div><a className="rv-login-link" href={`/${locale}/login`}>{ar ? "تسجيل الدخول" : "Sign in"}</a><RAVINEControls locale={locale} googleEnabled={googleEnabled}/></div>
+          <div><RAVINEOpenAuth className="rv-login-link">{ar ? "تسجيل الدخول" : "Sign in"}</RAVINEOpenAuth><RAVINEControls locale={locale} googleEnabled={googleEnabled}/></div>
         </header>
 
         <section className="rv-welcome">

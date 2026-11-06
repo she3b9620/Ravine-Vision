@@ -7,7 +7,7 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [x] Establish Next.js, React, and TypeScript application shell.
 - [x] Establish initial Arabic/English landing experience.
 - [x] Record charter, architecture boundaries, open decisions, and economy scope.
-- [x] Verify install, lint, and production build in a real execution environment.
+- [x] Verify install, lint, and production build in a real execution environment (2026-11-06).
 
 ## Phase 1 — Product skeleton
 - [x] Define shared brand and navigation models.
@@ -15,7 +15,7 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [x] Add locale-prefixed landing, discovery, and about routes.
 - [x] Add works, creators, communities, and creator-space route shells.
 - [x] Add shared accessible UI primitives and empty/loading/error states.
-- [ ] Add route and component tests.
+- [x] Add route and component tests.
 
 ## Phase 2 — Domain contracts
 - [x] Define account, creator identity, work, community, rights, and moderation contracts.
@@ -41,4 +41,15 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [ ] Sustainable monetization experiments with explicit approvals.
 - [ ] Reliability, observability, accessibility, and performance hardening.
 
-No deployment, legacy migration, or production integration is authorized by this roadmap.
+No legacy migration or production integration beyond the isolated `ravine-vision` Vercel and Supabase projects is authorized by this roadmap.
+
+## Delivery log
+
+- **2026-11-06** — Controlled work publishing: creator submission from an active
+  identity, staff review queue, publish/return decisions with audit records, creator
+  review notes, and public `/works` listing and detail pages. See
+  [Work Publishing Workflow](WORK_PUBLISHING.md).
+- **2026-11-06** — With explicit founder authorization, the full isolated migration
+  set was applied to the `ravine-vision` Supabase project, and a preview deployment
+  was published on Vercel for the `preview/vercel-review` branch. No production
+  deployment and no changes to `main` or the legacy repositories.

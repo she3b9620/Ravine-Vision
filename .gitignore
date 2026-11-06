@@ -10,3 +10,6 @@ coverage/
 *.log
 .DS_Store
 .vercel/
+supabase/.temp/
+RAVINE_COMPLETE_TRANSFER_PACKAGE_*.zip
+transfer_package_extracted/
