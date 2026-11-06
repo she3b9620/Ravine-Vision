@@ -1,13 +1,13 @@
-import {notFound,redirect} from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import {createClient} from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 import {reviewItem} from "./actions";
 export const dynamic="force-dynamic";
 type Props={params:Promise<{locale:string}>;searchParams:Promise<{done?:string;error?:string}>};
 export default async function ReviewConsole({params,searchParams}:Props){
  const {locale}=await params;const query=await searchParams;
  if(locale!=="ar"&&locale!=="en")notFound();const ar=locale==="ar";
- const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/"+locale+"/login");
+ const { supabase } = await requireUser(locale);
  const {data:role}=await supabase.rpc("current_staff_role");
  if(!role||!["reviewer","moderator","admin","owner"].includes(role))notFound();
  const canReview=["reviewer","admin","owner"].includes(role);const canModerate=["moderator","admin","owner"].includes(role);

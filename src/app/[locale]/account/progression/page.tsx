@@ -1,12 +1,12 @@
-import {notFound,redirect} from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import {createClient} from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 import {requestAccountTier} from "./actions";
 export const dynamic="force-dynamic";
 type Props={params:Promise<{locale:string}>;searchParams:Promise<{done?:string;error?:string}>};
 export default async function ProgressionPage({params,searchParams}:Props){
  const {locale}=await params;const query=await searchParams;if(locale!=="ar"&&locale!=="en")notFound();const ar=locale==="ar";
- const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/"+locale+"/login");
+ const { supabase, user } = await requireUser(locale);
  const [{data:profile},{data:requests}]=await Promise.all([supabase.from("profiles").select("account_tier").eq("id",user.id).maybeSingle(),supabase.from("account_tier_requests").select("id,requested_tier,statement,status,submitted_at,review_notes").eq("account_id",user.id).order("submitted_at",{ascending:false}).limit(10)]);
  type Tier = "viewer" | "creator" | "verified" | "select";
  const currentTier: Tier = (["viewer","creator","verified","select"] as string[]).includes(profile?.account_tier ?? "") ? profile!.account_tier as Tier : "viewer";

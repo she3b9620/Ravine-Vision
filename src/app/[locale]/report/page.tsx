@@ -1,12 +1,12 @@
-import {notFound,redirect} from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import {createClient} from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 import {submitSafetyReport} from "./actions";
 export const dynamic="force-dynamic";
 type Props={params:Promise<{locale:string}>;searchParams:Promise<{done?:string;error?:string}>};
 export default async function ReportPage({params,searchParams}:Props){
  const {locale}=await params;const query=await searchParams;if(locale!=="ar"&&locale!=="en")notFound();const ar=locale==="ar";
- const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/"+locale+"/login");
+ await requireUser(locale);
  return <main className="creator-screen" dir={ar?"rtl":"ltr"}><header className="creator-header"><Link className="rv-logo" href={"/"+locale}><i className="rv-logo-wordmark" role="img" aria-label="RAVINE" /></Link><nav>{ar?"السلامة والمجتمع":"Safety & community"}</nav></header><section className="creator-intro"><p className="rv-eyebrow"><i/>COMMUNITY SAFETY</p><h1>{ar?"الإبلاغ عن محتوى أو سلوك":"Report content or behavior"}</h1><p>{ar?"تُراجع البلاغات بواسطة فريق مخوّل. قدّم معلومات دقيقة، ولا تضع بيانات شخصية حساسة لا تلزم لفهم البلاغ.":"Reports are reviewed by authorized staff. Provide accurate context and avoid unnecessary sensitive personal information."}</p></section>
  {query.done&&<p className="creator-alert success" role="status">{ar?"تم استلام البلاغ.":"Your report has been submitted."}</p>}
  {query.error&&<p className="creator-alert" role="alert">{ar?"تعذر إرسال البلاغ. راجع البيانات وحاول مجددًا.":"The report could not be submitted. Check the details and try again."}</p>}

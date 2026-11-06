@@ -1,6 +1,6 @@
-import { notFound,redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 import { submitRightsDeclaration } from "./actions";
 export const dynamic="force-dynamic";
 type Props={params:Promise<{locale:string;workId:string}>;searchParams:Promise<{submitted?:string}>};
@@ -8,7 +8,7 @@ const choices=[["creator_asserted","أمتلك العمل / أملك حقوقه"
 export default async function RightsPage({params,searchParams}:Props){
  const {locale,workId}=await params;const query=await searchParams;
  if(locale!=="ar"&&locale!=="en")notFound();const ar=locale==="ar";
- const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/"+locale+"/login");
+ const { supabase, user } = await requireUser(locale);
  const {data:work}=await supabase.from("works").select("id,title,status").eq("id",workId).eq("created_by",user.id).maybeSingle();
  if(!work)notFound();
  const {data:declarations}=await supabase.from("rights_declarations").select("id,declaration,review_status,created_at").eq("work_id",workId).order("created_at",{ascending:false});

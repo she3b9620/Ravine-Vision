@@ -1,13 +1,13 @@
-import {notFound,redirect} from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import {createClient} from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 import {registerMediaIntent} from "./actions";
 export const dynamic="force-dynamic";
 type Props={params:Promise<{locale:string;workId:string}>;searchParams:Promise<{registered?:string;error?:string}>};
 export default async function WorkMediaPage({params,searchParams}:Props){
  const {locale,workId}=await params;const query=await searchParams;
  if(locale!=="ar"&&locale!=="en")notFound();const ar=locale==="ar";
- const supabase=await createClient();const {data:{user}}=await supabase.auth.getUser();if(!user)redirect("/"+locale+"/login");
+ const { supabase, user } = await requireUser(locale);
  const {data:work}=await supabase.from("works").select("id,title").eq("id",workId).eq("created_by",user.id).eq("status","draft").maybeSingle();if(!work)notFound();
  const {data:assets}=await supabase.from("media_assets").select("id,asset_kind,mime_type,byte_size,state,created_at").eq("owner_account_id",user.id).order("created_at",{ascending:false}).limit(30);
  return <main className="creator-screen" dir={ar?"rtl":"ltr"}>

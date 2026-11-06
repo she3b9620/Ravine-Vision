@@ -10,8 +10,8 @@ export default async function LoginPage({ params, searchParams }: Props) {
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
   const errors: Record<string, string> = ar
-    ? { missing: "أدخل البريد الإلكتروني وكلمة المرور.", credentials: "بيانات الدخول غير صحيحة.", invalid: "راجع الاسم والبريد، واجعل كلمة المرور 10 أحرف على الأقل.", signup: "تعذر إنشاء الحساب. قد يكون البريد مستخدمًا بالفعل.", callback: "تعذر تأكيد الحساب. حاول تسجيل الدخول." }
-    : { missing: "Enter your email and password.", credentials: "The email or password is incorrect.", invalid: "Check your name and email; password must be at least 10 characters.", signup: "Account creation failed. This email may already be registered.", callback: "Account confirmation failed. Try signing in." };
+    ? { missing: "أدخل البريد الإلكتروني وكلمة المرور.", credentials: "بيانات الدخول غير صحيحة.", invalid: "راجع الاسم والبريد، واجعل كلمة المرور 10 أحرف على الأقل.", signup: "تعذر إنشاء الحساب. قد يكون البريد مستخدمًا بالفعل.", callback: "تعذر تأكيد الحساب. حاول تسجيل الدخول.", backend: "خدمة الحسابات غير مهيّأة في هذه البيئة بعد. تصفح رَافِين متاح كزائر." }
+    : { missing: "Enter your email and password.", credentials: "The email or password is incorrect.", invalid: "Check your name and email; password must be at least 10 characters.", signup: "Account creation failed. This email may already be registered.", callback: "Account confirmation failed. Try signing in.", backend: "The account service is not configured in this environment yet. You can still browse RAVINE as a guest." };
   return (
     <main className="auth-screen" dir={ar ? "rtl" : "ltr"}>
       <header className="auth-header"><Link className="rv-logo" href={"/" + locale}><i className="rv-logo-wordmark" role="img" aria-label="RAVINE" /></Link><Link href={"/" + (ar ? "en" : "ar")} className="rv-lang">{ar ? "EN" : "عربي"}</Link></header>

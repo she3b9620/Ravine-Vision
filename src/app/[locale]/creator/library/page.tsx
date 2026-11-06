@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 
 export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ created?: string; updated?: string; error?: string; identity?: string }> };
@@ -10,9 +10,7 @@ export default async function CreatorLibraryPage({ params, searchParams }: Props
   const query = await searchParams;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/" + locale + "/login");
+  const { supabase, user } = await requireUser(locale);
   const { data: identities } = await supabase.from("creator_identities").select("id,display_name,handle").eq("owner_account_id", user.id).order("created_at",{ascending:false});
   const ids = (identities ?? []).map((item)=>item.id);
   const selectedIdentity = ids.includes(query.identity ?? "") ? query.identity! : "";

@@ -2,15 +2,24 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import { getSiteOrigin } from "@/lib/site-origin";
 
 const path = (locale: string, route: string) => "/" + (locale === "en" ? "en" : "ar") + route;
+
+// These actions run from the public /login page, which renders fine without a
+// backend. Guard before touching Supabase so a misconfigured deployment shows a
+// clear message instead of a 500.
+function requireBackend(locale: string) {
+  if (!getSupabaseEnvironment()) redirect(path(locale, "/login?error=backend"));
+}
 
 export async function signInAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "ar");
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   if (!email || !password) redirect(path(locale, "/login?error=missing"));
+  requireBackend(locale);
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) redirect(path(locale, "/login?error=credentials"));
@@ -25,6 +34,7 @@ export async function signUpAction(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   if (!displayName || !email || password.length < 10) redirect(path(locale, "/login?error=invalid"));
+  requireBackend(locale);
   const supabase = await createClient();
   const origin = await getSiteOrigin();
   const { error } = await supabase.auth.signUp({
@@ -41,6 +51,7 @@ export async function signUpAction(formData: FormData) {
 
 export async function signOutAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "ar");
+  requireBackend(locale);
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect(path(locale, ""));
@@ -48,6 +59,7 @@ export async function signOutAction(formData: FormData) {
 
 export async function signInWithGoogleAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "ar") === "en" ? "en" : "ar";
+  requireBackend(locale);
   const supabase = await createClient();
   const origin = await getSiteOrigin();
   const { data, error } = await supabase.auth.signInWithOAuth({

@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +10,7 @@ export default async function SettingsPage({ params }: Props) {
   const { locale } = await params;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/" + locale + "/login");
+  await requireUser(locale);
 
   return (
     <main className="rv-settings-page" dir={ar ? "rtl" : "ltr"}>

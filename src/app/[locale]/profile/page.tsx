@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 import { signOutAction } from "../auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -11,9 +11,7 @@ export default async function ProfilePage({ params }: Props) {
   const { locale } = await params;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/" + locale + "/login");
+  const { supabase, user } = await requireUser(locale);
 
   const { data: profile } = await supabase
     .from("profiles")

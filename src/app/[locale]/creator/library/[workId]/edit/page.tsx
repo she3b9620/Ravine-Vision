@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 import { updateWorkDraft } from "./actions";
 export const dynamic="force-dynamic";
 type Props={params:Promise<{locale:string;workId:string}>};
@@ -8,8 +8,7 @@ const kinds=["short","video","podcast","documentary","short_film","feature_film"
 export default async function EditWorkPage({params}:Props){
  const {locale,workId}=await params;
  if(locale!=="ar"&&locale!=="en") notFound();
- const ar=locale==="ar"; const supabase=await createClient();
- const {data:{user}}=await supabase.auth.getUser(); if(!user) redirect("/"+locale+"/login");
+ const ar=locale==="ar"; const { supabase, user } = await requireUser(locale);
  const {data:work}=await supabase.from("works").select("id,creator_identity_id,title,synopsis,kind,language_code").eq("id",workId).eq("created_by",user.id).eq("status","draft").maybeSingle();
  if(!work) notFound();
  const {data:identity}=await supabase.from("creator_identities").select("display_name,handle").eq("id",work.creator_identity_id).eq("owner_account_id",user.id).maybeSingle();

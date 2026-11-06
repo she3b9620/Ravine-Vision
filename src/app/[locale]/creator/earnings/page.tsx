@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 
 export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ locale: string }> };
@@ -9,9 +9,7 @@ export default async function EarningsPage({ params }: Props) {
   const { locale } = await params;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/" + locale + "/login");
+  const { supabase, user } = await requireUser(locale);
 
   const [{ data: entries }, { data: payouts }] = await Promise.all([
     supabase.from("economic_ledger")

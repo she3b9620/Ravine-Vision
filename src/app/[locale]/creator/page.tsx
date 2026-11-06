@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 import { submitCreatorApplication } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -11,9 +11,7 @@ export default async function CreatorPage({ params, searchParams }: Props) {
   const query = await searchParams;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/" + locale + "/login");
+  const { supabase, user } = await requireUser(locale);
   const { data: identities } = await supabase.from("creator_identities").select("id,display_name,handle,biography,discipline_tags,status,created_at").eq("owner_account_id", user.id).order("created_at", { ascending: false });
   const ids = (identities ?? []).map((item) => item.id);
   const { data: applications } = ids.length ? await supabase.from("creator_applications").select("id,creator_identity_id,status,submitted_at").in("creator_identity_id", ids).order("submitted_at", { ascending: false }) : { data: [] as { id:string; creator_identity_id:string; status:string; submitted_at:string }[] };

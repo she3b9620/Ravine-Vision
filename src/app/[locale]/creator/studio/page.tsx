@@ -1,6 +1,6 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/session";
 import { createWorkDraft } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -11,9 +11,7 @@ export default async function StudioPage({ params, searchParams }: Props) {
   const query = await searchParams;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/" + locale + "/login");
+  const { supabase, user } = await requireUser(locale);
   const { data: identities } = await supabase.from("creator_identities").select("id,display_name,handle").eq("owner_account_id", user.id).order("created_at", { ascending: false });
   const errors: Record<string,string> = ar ? { validation:"راجع عنوان العمل ونوعه ولغته.", identity:"الهوية المختارة غير متاحة لحسابك.", save:"تعذر حفظ المسودة. حاول مرة أخرى." } : { validation:"Check the work title, type, and language.", identity:"That creative identity is not available to your account.", save:"The draft could not be saved. Try again." };
   return <main className="creator-screen" dir={ar ? "rtl" : "ltr"}>
