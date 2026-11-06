@@ -89,7 +89,7 @@ should be added to the client.
 |---|---|---|
 | `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
 | Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
-| Local HEAD after | `8a1317d` | `feat(ux): branded 404 and error boundaries in both languages` |
+| Local HEAD after | `9b359dd` | `fix(auth): only offer Google sign-in when Supabase actually has it enabled` |
 
 Two local commits were already ahead of `origin` when the session started
 (`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
@@ -102,7 +102,7 @@ Two local commits were already ahead of `origin` when the session started
 |---|---|---|---|
 | Production build | `npm run build` | ✅ 39 routes, Next.js 16.4.5 (Turbopack) | ✅ 40 routes (+`/icon.png`) |
 | Lint | `npx eslint .` | ⚠️ 1 warning (`empty-state.tsx`: unused `locale`) | ✅ **0 problems** |
-| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **7 files / 32 tests passed** |
+| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **9 files / 39 tests passed** |
 
 ---
 
@@ -584,6 +584,34 @@ so the mistake is not repeated.
 
 ---
 
+## 5k. Round 10 — the Google button no longer lies
+
+**Verified defect.** The guest home rendered “Continue with Google”
+unconditionally, while the live Supabase project reports `external.google =
+false`. That is a control which cannot work, which the charter forbids, and
+clicking it produced a generic “confirmation failed” message that misexplained
+the cause.
+
+`getAuthProviders()` (`src/lib/auth-providers.ts`) reads `/auth/v1/settings` with
+a 5-minute revalidate and **fails closed**: no backend, a non-OK response, or a
+network error all resolve to “google unavailable”. Email sign-in is untouched, so
+nobody is locked out by the choice.
+
+`RAVINEControls` now takes `googleEnabled` (defaulting to false) and renders an
+explicit “not enabled in this environment yet” note instead of the button.
+
+Verified three independent ways:
+
+1. the live project returns `google=false`;
+2. the server-rendered RSC payload for `/ar` contains
+   `{"locale":"ar","googleEnabled":false}` — the check really reaches the client;
+3. component tests assert the button is absent when false, present when true, and
+   absent by default.
+
+Sweep unchanged: 43 routes, `16×200`, `27×307`, **0×5xx**. 39 tests passing.
+
+---
+
 ## 6. Claims I checked and did NOT confirm as defects
 
 Recorded so they are not repeated as facts:
@@ -603,7 +631,7 @@ Recorded so they are not repeated as facts:
 | Severity | Issue |
 |---|---|
 | **BLOCKER (product)** | Supabase has **no tables** (schema drift audit proves the migrations are sufficient once applied). Every authenticated surface (profile, creator studio, library, team, review, reporting) will fail at runtime until migrations are applied — which requires founder approval and a management token. |
-| **BLOCKER (auth)** | Google OAuth is **disabled** in the Supabase project (`google: false`). The "Continue with Google" button cannot work end-to-end. |
+| **BLOCKER (auth)** | Google OAuth is **disabled** in the Supabase project (`google: false`). The UI now hides the button instead of pretending (commit `9b359dd`); enabling the provider in Supabase remains a founder action. |
 | ~~HIGH~~ FIXED | Authenticated routes no longer 500 without a backend: all 13 pages, 2 server actions, the login actions and the OAuth callback now redirect to `/login?error=backend` (commit `027b073`). |
 | MEDIUM | Hero, creator, and studio visuals hotlink `images.unsplash.com` in `globals.css` — third-party stock imagery, extra origin, no brand control. Needs a design decision. |
 | MEDIUM | `docs/ROADMAP.md` (in commit `b853049`) marks three Phase-3 items as `[x]`, including "Select media storage and processing architecture". **I found no storage integration, configuration, or credentials** to support that. Treat as unverified until evidence is supplied. |
