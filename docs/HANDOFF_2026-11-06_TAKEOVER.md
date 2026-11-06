@@ -46,6 +46,21 @@ The project is connected to GitHub (`productionBranch: main`), and any push to
 Under the standing LOCKED rule ("no deploy, even Preview, without explicit
 request"), work is committed locally only.
 
+### Live deployment status (read-only check, 2026-11-06)
+
+- Production `https://ravine-vision.vercel.app` (built from `main`, commit
+  `c7ef17a` — **older than this branch**): `/ar`, `/en`, `/discover`, `/works`,
+  `/creators`, `/communities`, `/login` all `200`; `/profile` and `/creator`
+  correctly `307` to `/login`.
+- The preview branch alias
+  `ravine-vision-git-preview-vercel-review-she3b9620.vercel.app` answers `302`
+  to Vercel SSO (`vercel.com/sso-api`). Deployment Protection is on, so a
+  preview link **cannot be shared publicly** without a share link or disabling
+  protection. Worth deciding before the next review round.
+
+Note: because production tracks `main` and this work is on
+`preview/vercel-review`, **none of the fixes below are live yet**.
+
 ### Verified Supabase project state
 
 - Auth health: `200` — project is live.
