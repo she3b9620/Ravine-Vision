@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getSiteOrigin } from "@/lib/site-origin";
 
 const path = (locale: string, route: string) => "/" + (locale === "en" ? "en" : "ar") + route;
 
@@ -25,12 +26,13 @@ export async function signUpAction(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   if (!displayName || !email || password.length < 10) redirect(path(locale, "/login?error=invalid"));
   const supabase = await createClient();
+  const origin = await getSiteOrigin();
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { display_name: displayName },
-      emailRedirectTo: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000") + "/" + (locale === "en" ? "en" : "ar") + "/auth/callback",
+      emailRedirectTo: origin + "/" + (locale === "en" ? "en" : "ar") + "/auth/callback",
     },
   });
   if (error) redirect(path(locale, "/login?error=signup"));
@@ -47,10 +49,11 @@ export async function signOutAction(formData: FormData) {
 export async function signInWithGoogleAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "ar") === "en" ? "en" : "ar";
   const supabase = await createClient();
+  const origin = await getSiteOrigin();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000") + "/" + locale + "/auth/callback",
+      redirectTo: origin + "/" + locale + "/auth/callback",
       queryParams: { access_type: "offline", prompt: "consent" },
     },
   });
