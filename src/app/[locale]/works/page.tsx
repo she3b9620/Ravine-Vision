@@ -14,13 +14,11 @@ const placeholderWorks = [
     id: "1",
     title: { ar: "حكاية سينمائية", en: "Cinematic Story" },
     creator: { ar: "مبدع غير محدد", en: "Unspecified Creator" },
-    status: "published" as const,
   },
   {
     id: "2",
     title: { ar: "حوار مع فنان", en: "Conversation with an Artist" },
     creator: { ar: "مبدع غير محدد", en: "Unspecified Creator" },
-    status: "published" as const,
   },
 ];
 
@@ -75,14 +73,14 @@ export default async function WorksPage({ params }: { params: Promise<{ locale: 
           <h2>{ar ? "أمثلة على الأعمال" : "Sample Works"}</h2>
           <div className="rv-work-grid">
             {placeholderWorks.map((work) => (
-              <Link key={work.id} href={`/${locale}/works/${work.id}`} className="rv-work-card">
+              <article key={work.id} className="rv-work-card">
+                <span className="rv-example-badge">{ar ? "مثال توضيحي" : "Example"}</span>
                 <div className="rv-work-poster">{work.title[ar ? "ar" : "en"]}</div>
                 <div className="rv-work-info">
                   <h3>{work.title[ar ? "ar" : "en"]}</h3>
                   <p className="rv-work-creator">{work.creator[ar ? "ar" : "en"]}</p>
-                  <span className="rv-work-status">{work.status}</span>
                 </div>
-              </Link>
+              </article>
             ))}
           </div>
           <p className="rv-works-note">

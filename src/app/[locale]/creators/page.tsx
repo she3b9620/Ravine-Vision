@@ -8,7 +8,6 @@ const placeholderCreators = [
     handle: { ar: "creative_voice", en: "creative_voice" },
     bio: { ar: "مبدع متخصص في الفنون البصرية والتصوير.", en: "Artist specializing in visual arts and photography." },
     discipline: { ar: "فنون بصرية", en: "Visual Arts" },
-    worksCount: 5,
   },
   {
     id: "creator-2",
@@ -16,7 +15,6 @@ const placeholderCreators = [
     handle: { ar: "mind_explorer", en: "mind_explorer" },
     bio: { ar: "محاضر في مجال الفلسفة والعلوم.", en: "Lecturer in philosophy and science." },
     discipline: { ar: "علم", en: "Knowledge" },
-    worksCount: 12,
   },
 ];
 
@@ -58,7 +56,8 @@ export default async function CreatorsPage({ params }: { params: Promise<{ local
 
         <div className="rv-creator-cards">
           {placeholderCreators.map((creator) => (
-            <Link key={creator.id} href={`/${locale}/creators/${creator.id}`} className="rv-creator-card">
+            <article key={creator.id} className="rv-creator-card">
+              <span className="rv-example-badge">{ar ? "مثال توضيحي" : "Example"}</span>
               <div className="rv-creator-avatar">{creator.name[ar ? "ar" : "en"][0]}</div>
               <div className="rv-creator-info">
                 <h3>{creator.name[ar ? "ar" : "en"]}</h3>
@@ -66,11 +65,9 @@ export default async function CreatorsPage({ params }: { params: Promise<{ local
                 <p className="rv-creator-bio">{creator.bio[ar ? "ar" : "en"]}</p>
                 <div className="rv-creator-meta">
                   <span className="rv-creator-discipline">{creator.discipline[ar ? "ar" : "en"]}</span>
-                  <span className="rv-creator-works">{creator.worksCount} {ar ? "عمل" : "works"}</span>
                 </div>
               </div>
-              <span className="rv-creator-link">↗</span>
-            </Link>
+            </article>
           ))}
         </div>
 

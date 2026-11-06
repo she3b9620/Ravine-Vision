@@ -6,7 +6,6 @@ interface Community {
   name: { ar: string; en: string };
   description: { ar: string; en: string };
   visibility: "public" | "invite-only";
-  membersCount: number;
   owner: { ar: string; en: string };
 }
 
@@ -16,7 +15,6 @@ const placeholderCommunities: Community[] = [
     name: { ar: "مجتمع السينما البشرية", en: "Human Cinema Community" },
     description: { ar: "نقاش عن الأعمال السينمائية التي تعكس التجارب الإنسانية.", en: "Discussing films that reflect human experiences." },
     visibility: "public",
-    membersCount: 42,
     owner: { ar: "مبدع غير محدد", en: "Unspecified Creator" },
   },
   {
@@ -24,7 +22,6 @@ const placeholderCommunities: Community[] = [
     name: { ar: "مجتمع الفنون المعاصرة", en: "Contemporary Arts Community" },
     description: { ar: "مجموعة للمصورين والرسامين والمصممين.", en: "A group for photographers, painters, and designers." },
     visibility: "public",
-    membersCount: 28,
     owner: { ar: "مبدع غير محدد", en: "Unspecified Creator" },
   },
 ];
@@ -67,19 +64,18 @@ export default async function CommunitiesPage({ params }: { params: Promise<{ lo
 
         <div className="rv-community-cards">
           {placeholderCommunities.map((community) => (
-            <Link key={community.id} href={`/${locale}/communities/${community.id}`} className="rv-community-card">
+            <article key={community.id} className="rv-community-card">
+              <span className="rv-example-badge">{ar ? "مثال توضيحي" : "Example"}</span>
               <div className="rv-community-info">
                 <h3>{community.name[ar ? "ar" : "en"]}</h3>
                 <p className="rv-community-desc">{community.description[ar ? "ar" : "en"]}</p>
                 <div className="rv-community-meta">
-                  <span className="rv-community-members">{community.membersCount}</span>
                   <span className="rv-community-visibility">
             {community.visibility === "public" ? (ar ? "علني" : "Public") : (ar ? "خاص" : "Private")}
           </span>
                 </div>
               </div>
-              <span className="rv-community-link">{ar ? "انضم" : "Join"} →</span>
-            </Link>
+            </article>
           ))}
         </div>
 
