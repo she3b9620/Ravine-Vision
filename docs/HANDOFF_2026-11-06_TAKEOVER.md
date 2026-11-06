@@ -1,4 +1,4 @@
-# RAVINE VISION — Takeover Handoff
+﻿# RAVINE VISION — Takeover Handoff
 
 **Date:** 2026-11-06
 **Repository:** `she3b9620/Ravine-Vision`
@@ -89,7 +89,7 @@ should be added to the client.
 |---|---|---|
 | `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
 | Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
-| Local HEAD after | `027b073` | `fix(auth): guard every authenticated surface so a missing backend redirects instead of crashing` |
+| Local HEAD after | `4bf5005` | `fix(auth): register the session-refresh proxy so Supabase cookies actually rotate` |
 
 Two local commits were already ahead of `origin` when the session started
 (`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
@@ -322,6 +322,75 @@ locales. Four new tests cover the guard → 20 total.
 
 ---
 
+## 5e. Round 5 — the session-refresh proxy was never registered
+
+**Verified defect (most consequential so far).** `proxy.ts` sat at the repository
+root, but this project keeps its app under `src/`. Next resolves the file as
+`(?:src/)?proxy`, and with a `src` directory present the root file was silently
+ignored. Three independent pieces of evidence:
+
+1. `next build` printed no `Proxy`/`Middleware` line;
+2. `.next/server/middleware-manifest.json` contained empty `middleware`,
+   `sortedMiddleware` and `functions`;
+3. a temporary response header set inside `updateSession()` **never appeared on
+   any response** — the handler genuinely never executed.
+
+Impact: `updateSession()` never ran, so `@supabase/ssr` never refreshed session
+cookies. With `jwt_expiry = 3600`, a signed-in user's access token would expire
+after an hour and every server-side `getUser()` would then see no session — a
+silent logout — and the `setAll` cookie-write path was dead code in production.
+
+Fix: `git mv proxy.ts src/proxy.ts`. After the move:
+
+- the build prints `ƒ Proxy (Middleware)`;
+- the probe header appeared on `/ar`, `/en`, `/ar/profile` and static 404s,
+  proving the handler runs on every matched request.
+
+The probe header was removed before committing. Full sweep after the move:
+43 routes, `16×200`, `27×307`, **0×5xx** — no regression.
+
+I also checked the handler body was not itself broken:
+`auth.getClaims()` exists in `@supabase/supabase-js` 2.118.0, and
+`setAll(cookies, headers)` matches the `SetAllCookies` signature in
+`@supabase/ssr` 0.12.7. Only the registration was missing.
+
+---
+
+## 5f. Code ↔ schema drift audit: zero drift
+
+Everything the application asks the database for was cross-checked against the
+15 migration files (static analysis of `.from(...)` and `.rpc(...)` against
+`create table` / `create function`).
+
+| Check | Result |
+|---|---|
+| Tables/views queried by code | 12 |
+| RPCs called by code | 9 |
+| Queried but never created | **0** |
+| Called but never defined | **0** |
+
+Tables in use: `account_tier_requests`, `creator_applications`,
+`creator_identities`, `creator_team_invitations`, `creator_team_memberships`,
+`economic_ledger`, `media_assets`, `payout_requests`, `profiles`,
+`rights_declarations`, `safety_reports`, `works`.
+
+RPCs in use: `current_staff_role`, `list_my_pending_creator_team_invitations`,
+`remove_creator_team_member`, `respond_to_creator_team_invitation`,
+`review_account_tier_request`, `review_creator_application`,
+`review_rights_declaration`, `review_safety_report`,
+`revoke_creator_team_invitation`.
+
+**Why this matters:** the empty database is the biggest blocker, and this audit
+shows the migrations are sufficient for every code path — no missing table or
+function would fail after they are applied. (It does not validate columns, RLS
+policy correctness, or function behaviour; those need a live database.)
+
+Tables created but not yet queried: `audit_events`, `communities`,
+`community_memberships`, `follows`, `work_comments`, `work_media`,
+`work_reactions` — expected, these back features not yet wired to the UI.
+
+---
+
 ## 6. Claims I checked and did NOT confirm as defects
 
 Recorded so they are not repeated as facts:
@@ -340,7 +409,7 @@ Recorded so they are not repeated as facts:
 
 | Severity | Issue |
 |---|---|
-| **BLOCKER (product)** | Supabase has **no tables**. Every authenticated surface (profile, creator studio, library, team, review, reporting) will fail at runtime until migrations are applied — which requires founder approval and a management token. |
+| **BLOCKER (product)** | Supabase has **no tables** (schema drift audit proves the migrations are sufficient once applied). Every authenticated surface (profile, creator studio, library, team, review, reporting) will fail at runtime until migrations are applied — which requires founder approval and a management token. |
 | **BLOCKER (auth)** | Google OAuth is **disabled** in the Supabase project (`google: false`). The "Continue with Google" button cannot work end-to-end. |
 | ~~HIGH~~ FIXED | Authenticated routes no longer 500 without a backend: all 13 pages, 2 server actions, the login actions and the OAuth callback now redirect to `/login?error=backend` (commit `027b073`). |
 | MEDIUM | Hero, creator, and studio visuals hotlink `images.unsplash.com` in `globals.css` — third-party stock imagery, extra origin, no brand control. Needs a design decision. |
