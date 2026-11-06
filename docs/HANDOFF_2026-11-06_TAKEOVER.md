@@ -89,7 +89,7 @@ should be added to the client.
 |---|---|---|
 | `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
 | Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
-| Local HEAD after | `4bf5005` | `fix(auth): register the session-refresh proxy so Supabase cookies actually rotate` |
+| Local HEAD after | `87c7849` | `fix(a11y): global reduced motion, themed focus ring, readable light-theme accents` |
 
 Two local commits were already ahead of `origin` when the session started
 (`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
@@ -102,7 +102,7 @@ Two local commits were already ahead of `origin` when the session started
 |---|---|---|---|
 | Production build | `npm run build` | ✅ 39 routes, Next.js 16.4.5 (Turbopack) | ✅ 40 routes (+`/icon.png`) |
 | Lint | `npx eslint .` | ⚠️ 1 warning (`empty-state.tsx`: unused `locale`) | ✅ **0 problems** |
-| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **4 files / 20 tests passed** |
+| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **5 files / 24 tests passed** |
 
 ---
 
@@ -391,6 +391,52 @@ Tables created but not yet queried: `audit_events`, `communities`,
 
 ---
 
+## 5g. Round 6 — accessibility conformance (measured, not asserted)
+
+Contrast ratios were computed from the shipped palette rather than eyeballed.
+
+### Defect: light-theme accent text failed WCAG AA
+
+| Pair | Ratio | AA (4.5:1) |
+|---|---|---|
+| sand `#D49A78` on cream `#F1E9DC` | 2.00 | FAIL |
+| copper `#C47A52` on cream | 2.79 | FAIL |
+| copper on sidebar `#F7F2E9` | 3.01 | FAIL |
+| copper on card `#FFFAF2` | 3.23 | FAIL |
+| brown `#70402F` on cream (**fix**) | 7.08 | PASS |
+| brown on sidebar / card | 7.64 / 8.20 | PASS |
+
+The palette's own brown replaces sand/copper for **accent text** in the light
+theme only (20 selectors, scoped to `.rv-shell` and `.rv-discover-page` so the
+pages that stay dark are unaffected). Copper backgrounds keep dark ink text
+(`#100d0b` on copper ≈ 5.9:1), so buttons were already compliant.
+
+Dark theme was already compliant: cream 16.53:1, muted 0.62 alpha 6.61:1,
+copper 5.93:1, sand 8.24:1.
+
+### Defect: no keyboard focus indicator
+
+No `:focus-visible` rule existed anywhere, and `.auth-form` / `.creator-form`
+inputs set `outline:none` with only a 1px border-colour change as feedback.
+
+No single brand colour reaches 3:1 on both surfaces (sand 8.24:1 on ink but
+2.00:1 on cream; brown is the inverse), so a themed `--rv-focus` token drives a
+2px ring: sand in dark, brown in light.
+
+### Defect: reduced motion only partly honoured
+
+The three existing `prefers-reduced-motion` blocks covered `.ravine-home`,
+`.rv-shell` and the auth modal only. Discover, creator, profile, works,
+creators, communities, settings and auth screens were uncovered. A global rule
+now applies to `*, *::before, *::after`.
+
+Verified in the built stylesheet: `:focus-visible` ×11,
+`prefers-reduced-motion` ×4 (including the global one), `#70402f` ×5.
+A 4-test contract guard (`src/app/a11y-contract.test.ts`) reads `globals.css`
+so these cannot silently disappear.
+
+---
+
 ## 6. Claims I checked and did NOT confirm as defects
 
 Recorded so they are not repeated as facts:
@@ -415,7 +461,7 @@ Recorded so they are not repeated as facts:
 | MEDIUM | Hero, creator, and studio visuals hotlink `images.unsplash.com` in `globals.css` — third-party stock imagery, extra origin, no brand control. Needs a design decision. |
 | MEDIUM | `docs/ROADMAP.md` (in commit `b853049`) marks three Phase-3 items as `[x]`, including "Select media storage and processing architecture". **I found no storage integration, configuration, or credentials** to support that. Treat as unverified until evidence is supplied. |
 | ~~LOW~~ FIXED | Dead CSS removed: `.rv-logo span`, `.rv-brand-mark` (+ its mobile override), `.rv-work-status`, `.rv-creator-link`, `.rv-community-link` (`4ee627b`). |
-| LOW | `avenir-arabic-regular.otf` is not registered — it duplicates the `book` 400 weight. Kept on disk. |
+| LOW | `avenir-arabic-regular.otf` is not registered (duplicates the `book` 400 weight); kept on disk. |
 
 ---
 
