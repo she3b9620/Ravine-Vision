@@ -55,6 +55,15 @@ These items must not be silently finalized by implementation. Record options, tr
 - Analytics and privacy-preserving measurement.
 - Search infrastructure and recommendation architecture.
 - Native application strategy and release sequencing.
+- Content-Security-Policy strategy: nonce versus hash, permitted script/style
+  sources, and whether to roll out report-only first. Baseline headers
+  (`X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`,
+  `Permissions-Policy`) are already applied in `next.config.ts`; CSP is
+  deliberately deferred because Next.js injects inline bootstrap scripts and the
+  UI uses inline style attributes, so a naive policy would break rendering.
+- Whether third-party sites may embed RAVINE pages. `X-Frame-Options` is
+  currently `SAMEORIGIN` (blocks clickjacking, allows first-party embeds);
+  revisit before any public embedding feature.
 
 ## Decision protocol
 
