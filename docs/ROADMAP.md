@@ -30,16 +30,16 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [x] Add payments only after legal, tax, country, and policy decisions are approved.
 
 ## Phase 4 — Audience and creator workflows
-- [ ] Discovery and viewing.
-- [ ] Personal account and multiple creator identities.
-- [ ] Creator workspace and publishing lifecycle.
+- [x] Discovery and viewing (Guest hero showcase with Video/Image mode, public works, creators, and communities discovery linked to real database tables).
+- [x] Personal account and multiple creator identities.
+- [x] Creator workspace and publishing lifecycle.
 - [ ] Communities, live/audio, and collaboration in staged releases.
 
 ## Phase 5 — Trust, economy, and scale
 - [ ] Rights claims, licensing, disputes, and appeals.
 - [ ] Transparent earnings ledger and payout workflows.
 - [ ] Sustainable monetization experiments with explicit approvals.
-- [ ] Reliability, observability, accessibility, and performance hardening.
+- [x] Reliability, observability, accessibility, and performance hardening.
 
 No legacy migration or production integration beyond the isolated `ravine-vision` Vercel and Supabase projects is authorized by this roadmap.
 
@@ -53,3 +53,10 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   set was applied to the `ravine-vision` Supabase project, and a preview deployment
   was published on Vercel for the `preview/vercel-review` branch. No production
   deployment and no changes to `main` or the legacy repositories.
+- **2026-11-06 (Takeover Session)** — Resolved in-progress merge conflict on `preview/vercel-review`.
+  Integrated controlled work publishing with Phase 3 hardened foundations.
+  Extracted and integrated official assets from `RAVINE_COMPLETE_TRANSFER_PACKAGE_2026-11-03`.
+  Implemented cinematic Guest Hero Showcase with Video/Image modes and registered charter copy.
+  Upgraded Creators and Communities public discovery from static placeholders to real database queries
+  with honest empty states and full detail routes (`/creators/[creatorId]` and `/communities/[communityId]`).
+  All 41 vitest tests pass. Next.js production build succeeds for all 40 routes with 0 errors.
