@@ -29,7 +29,7 @@ export default async function ProfilePage({ params }: Props) {
   return (
     <main className="profile-screen" dir={ar ? "rtl" : "ltr"}>
       <header className="profile-top">
-        <Link className="rv-logo" href={"/" + locale}>RAVINE<span>.</span></Link>
+        <Link className="rv-logo" href={"/" + locale}><i className="rv-logo-wordmark" role="img" aria-label="RAVINE" /></Link>
         <Link href={"/" + (ar ? "en" : "ar") + "/profile"}>{ar ? "English" : "العربية"}</Link>
       </header>
       <div className="profile-grid">

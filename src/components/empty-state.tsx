@@ -14,8 +14,8 @@ export function EmptyState({
   actionHref?: string;
 }) {
   return (
-    <div className="rv-empty-state">
-      <div className="rv-empty-symbol">◌</div>
+    <div className="rv-empty-state" lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
+      <div className="rv-empty-symbol" aria-hidden="true">◌</div>
       <h3>{title}</h3>
       <p>{description}</p>
       {actionLabel && actionHref && (

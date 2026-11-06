@@ -13,7 +13,7 @@ export default async function RightsPage({params,searchParams}:Props){
  if(!work)notFound();
  const {data:declarations}=await supabase.from("rights_declarations").select("id,declaration,review_status,created_at").eq("work_id",workId).order("created_at",{ascending:false});
  return <main className="creator-screen" dir={ar?"rtl":"ltr"}>
- <header className="creator-header"><Link className="rv-logo" href={"/"+locale}>RAVINE<span>.</span></Link><nav><Link href={"/"+locale+"/creator/library"}>{ar?"مكتبة الأعمال":"Work library"}</Link></nav></header>
+ <header className="creator-header"><Link className="rv-logo" href={"/"+locale}><i className="rv-logo-wordmark" role="img" aria-label="RAVINE" /></Link><nav><Link href={"/"+locale+"/creator/library"}>{ar?"مكتبة الأعمال":"Work library"}</Link></nav></header>
  <section className="creator-intro"><p className="rv-eyebrow"><i/>RIGHTS & OWNERSHIP</p><h1>{ar?"الحقوق والملكية.":"Rights & ownership."}</h1><p>{ar?"سجّل إقرارك بشأن الحقوق المرتبطة بالعمل. الإقرار ليس إثبات ملكية نهائيًا ولا يحل محل مراجعة المستندات أو موافقات أصحاب الحقوق.":"Record your rights declaration for this work. A declaration is not final proof of ownership and does not replace document review or permissions from rights holders."}</p></section>
  <section className="creator-panel"><h2>{work.title}</h2>{query.submitted&&<p className="creator-alert success" role="status">{ar?"تم تسجيل الإقرار للمراجعة.":"Declaration submitted for review."}</p>}
  <form action={submitRightsDeclaration} className="creator-form"><input type="hidden" name="locale" value={locale}/><input type="hidden" name="work_id" value={work.id}/>

@@ -20,7 +20,7 @@ export default async function ReviewConsole({params,searchParams}:Props){
  const reports=reportsResult.data as Array<{id:string;category:string;target_type:string;status:string;target_id:string;explanation:string|null;evidence_references:string[]}>|null;
  const tierRequests=tierResult.data as Array<{id:string;requested_tier:string;account_id:string;status:string;statement:string}>|null;
  return <main className="creator-screen" dir={ar?"rtl":"ltr"}>
- <header className="creator-header"><Link className="rv-logo" href={"/"+locale}>RAVINE<span>.</span></Link><nav><span>{ar?"لوحة المراجعة":"Review console"}</span></nav></header>
+ <header className="creator-header"><Link className="rv-logo" href={"/"+locale}><i className="rv-logo-wordmark" role="img" aria-label="RAVINE" /></Link><nav><span>{ar?"لوحة المراجعة":"Review console"}</span></nav></header>
  <section className="creator-intro"><p className="rv-eyebrow"><i/>TRUST & REVIEW</p><h1>{ar?"المراجعة والمساءلة.":"Review & accountability."}</h1><p>{ar?"لوحة داخلية للمراجعين المخولين. كل قرار يُنفّذ عبر إجراء محمي ويُسجّل في سجل التدقيق.":"An internal console for authorized reviewers. Every decision runs through a protected operation and is recorded in the audit log."}</p><small>{ar?"الدور الحالي":"Current role"}: {role}</small></section>
  {query.done&&<p className="creator-alert success" role="status">{ar?"تم تسجيل القرار.":"Decision recorded."}</p>}
  {query.error&&<p className="creator-alert" role="alert">{ar?"تعذر تنفيذ القرار. راجع الصلاحية والحالة.":"The decision could not be completed. Check permissions and status."}</p>}

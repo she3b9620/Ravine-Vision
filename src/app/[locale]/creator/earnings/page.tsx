@@ -31,7 +31,7 @@ export default async function EarningsPage({ params }: Props) {
 
   return <main className="creator-screen" dir={ar ? "rtl" : "ltr"}>
     <header className="creator-header">
-      <Link className="rv-logo" href={"/" + locale}>RAVINE<span>.</span></Link>
+      <Link className="rv-logo" href={"/" + locale}><i className="rv-logo-wordmark" role="img" aria-label="RAVINE" /></Link>
       <nav><Link href={"/" + locale + "/creator"}>{ar ? "مساحة المبدع" : "Creator space"}</Link><Link href={"/" + locale + "/creator/library"}>{ar ? "الأعمال" : "Works"}</Link></nav>
     </header>
     <section className="creator-intro">

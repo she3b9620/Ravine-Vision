@@ -29,7 +29,7 @@ export default async function CreatorsPage({ params }: { params: Promise<{ local
     <main className="rv-creators-page" dir={ar ? "rtl" : "ltr"}>
       <header className="rv-works-header">
         <Link className="rv-brand" href={`/${locale}`}>
-          RAVINE<span>.</span>
+          <i className="rv-logo-wordmark" role="img" aria-label="RAVINE" />
         </Link>
         <nav>
           <Link href={`/${locale}`}>{ar ? "الرئيسية" : "Home"}</Link>
@@ -82,7 +82,7 @@ export default async function CreatorsPage({ params }: { params: Promise<{ local
 
       <footer className="rv-home-footer">
         <a className="rv-brand rv-footer-brand" href={`/${locale}`}>
-          RAVINE<small>THE PATH TO LIGHT</small>
+          <span className="rv-brand-lockup"><i className="rv-brand-wordmark" role="img" aria-label="RAVINE" /><small>THE PATH TO LIGHT</small></span>
         </a>
         <span>{ar ? "الكرامة · الإبداع · المعرفة · التقارب الإنساني" : "Dignity · Creativity · Knowledge · Human connection"}</span>
         <span>© RAVINE</span>

@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import RAVINEControls from "@/components/ravine-controls";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import MemberHome from "@/components/member-home";
+import type { User } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
@@ -65,15 +67,28 @@ const content = {
 export default async function LocalizedHome({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (locale !== "ar" && locale !== "en") notFound();
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+
+  // The public guest experience must render even when the backend is not
+  // configured or is temporarily unreachable. Only the signed-in branch needs
+  // Supabase, so a missing/failed backend degrades to the guest shell instead
+  // of failing the whole page (previously a hard 500).
+  let user: User | null = null;
+  if (getSupabaseEnvironment()) {
+    try {
+      const supabase = await createClient();
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch {
+      user = null;
+    }
+  }
   if (user) return <MemberHome locale={locale} displayName={String(user.user_metadata?.display_name ?? user.email?.split("@")[0] ?? (locale === "ar" ? "عضو رافين" : "RAVINE member"))} email={user.email ?? ""} />;
   const t = content[locale];
   const ar = locale === "ar";
   return (
     <main className={`rv-shell ${ar ? "rv-ar" : "rv-en"}`} dir={ar ? "rtl" : "ltr"}>
       <aside className="rv-sidebar">
-        <a className="rv-brand" href={`/${locale}`} aria-label="RAVINE home"><span>RAVINE<small>THE PATH TO LIGHT</small></span></a>
+        <a className="rv-brand" href={`/${locale}`} aria-label="RAVINE home"><span className="rv-brand-lockup"><i className="rv-brand-wordmark" role="img" aria-label="RAVINE" /><small>THE PATH TO LIGHT</small></span></a>
         <p className="rv-side-label">{t.sideLabel}</p>
         <nav className="rv-side-nav">{t.nav.map(([label, path], i) => <a className={i === 0 ? "active" : ""} href={`/${locale}${path}`} key={label}><span className="rv-nav-glyph">{["⌂","⌕","▤","✳","◉","ⓘ"][i]}</span>{label}{i === 0 ? <i /> : null}</a>)}</nav>
         <div className="rv-side-bottom"><div className="rv-guest-mark">◌</div><strong>{t.guest}</strong><p>{t.guestText}</p><a href={`/${locale}/login`}>{t.sign} ↗</a></div>
@@ -113,7 +128,7 @@ export default async function LocalizedHome({ params }: { params: Promise<{ loca
         </section>
 
         <section className="rv-creator-band"><div><p className="rv-kicker"><i />CREATOR UNIVERSE</p><h2>{t.creator}</h2><p>{t.creatorText}</p><a href={`/${locale}/creator`}>{t.creatorCta} <span>↗</span></a></div><div className="rv-creator-emblem"><span>R</span><small>CREATE / EXPRESS / CONNECT</small></div></section>
-        <footer className="rv-home-footer"><a className="rv-brand rv-footer-brand" href={`/${locale}`}><span>RAVINE<small>THE PATH TO LIGHT</small></span></a><span>{t.footer}</span><span>© RAVINE</span></footer>
+        <footer className="rv-home-footer"><a className="rv-brand rv-footer-brand" href={`/${locale}`}><span className="rv-brand-lockup"><i className="rv-brand-wordmark" role="img" aria-label="RAVINE" /><small>THE PATH TO LIGHT</small></span></a><span>{t.footer}</span><span>© RAVINE</span></footer>
       </div>
     </main>
   );

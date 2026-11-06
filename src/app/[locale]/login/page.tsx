@@ -14,7 +14,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
     : { missing: "Enter your email and password.", credentials: "The email or password is incorrect.", invalid: "Check your name and email; password must be at least 10 characters.", signup: "Account creation failed. This email may already be registered.", callback: "Account confirmation failed. Try signing in." };
   return (
     <main className="auth-screen" dir={ar ? "rtl" : "ltr"}>
-      <header className="auth-header"><Link className="rv-logo" href={"/" + locale}>RAVINE<span>.</span></Link><Link href={"/" + (ar ? "en" : "ar")} className="rv-lang">{ar ? "EN" : "عربي"}</Link></header>
+      <header className="auth-header"><Link className="rv-logo" href={"/" + locale}><i className="rv-logo-wordmark" role="img" aria-label="RAVINE" /></Link><Link href={"/" + (ar ? "en" : "ar")} className="rv-lang">{ar ? "EN" : "عربي"}</Link></header>
       <div className="auth-layout">
         <section className="auth-intro"><p className="rv-eyebrow"><i />THE PATH TO LIGHT</p><h1>{ar ? "مكانك في الحكاية يبدأ من هنا." : "Your place in the story begins here."}</h1><p>{ar ? "أنشئ حسابك لتكتشف وتتفاعل وتحفظ ما يهمك، أو لتبدأ رحلتك الإبداعية." : "Create an account to discover, participate, save what matters, or begin your creative journey."}</p></section>
         <section className="auth-panel">
