@@ -1,4 +1,4 @@
-﻿# RAVINE VISION — Takeover Handoff
+# RAVINE VISION — Takeover Handoff
 
 **Date:** 2026-11-06
 **Repository:** `she3b9620/Ravine-Vision`
@@ -74,7 +74,7 @@ should be added to the client.
 |---|---|---|
 | `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
 | Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
-| Local HEAD after | `4130309` | `fix(auth): derive redirect origin from the request instead of hardcoding localhost` |
+| Local HEAD after | `027b073` | `fix(auth): guard every authenticated surface so a missing backend redirects instead of crashing` |
 
 Two local commits were already ahead of `origin` when the session started
 (`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
@@ -87,7 +87,7 @@ Two local commits were already ahead of `origin` when the session started
 |---|---|---|---|
 | Production build | `npm run build` | ✅ 39 routes, Next.js 16.4.5 (Turbopack) | ✅ 40 routes (+`/icon.png`) |
 | Lint | `npx eslint .` | ⚠️ 1 warning (`empty-state.tsx`: unused `locale`) | ✅ **0 problems** |
-| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **3 files / 16 tests passed** |
+| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **4 files / 20 tests passed** |
 
 ---
 
@@ -266,6 +266,47 @@ Google is disabled in Supabase and no mail provider is configured.
 
 ---
 
+## 5d. Round 4 — authenticated surfaces no longer crash without a backend
+
+**Verified defect.** A build produced without Supabase env served HTTP `500` for
+every authenticated route: 13 pages, 2 server actions, the 4 login actions and
+the OAuth callback each called `createClient()` unconditionally, and
+`requireSupabaseEnvironment()` throws when the variables are absent. The login
+actions and the callback matter most because they are reachable from *public*
+pages.
+
+One guard now covers all of them — `requireUser(locale)` in
+`src/lib/supabase/session.ts`:
+
+- no backend configured, or the auth call throws → `…/login?error=backend`;
+- valid backend but no session → `…/login` (unchanged behaviour).
+
+Measured on a build with `.env.local` removed:
+
+```
+/ar/profile          => 307 /ar/login?error=backend     (was 500)
+/en/profile          => 307 /en/login?error=backend     (was 500)
+/ar/creator          => 307 /ar/login?error=backend     (was 500)
+/ar/creator/studio   => 307 /ar/login?error=backend     (was 500)
+/ar/creator/library  => 307 /ar/login?error=backend     (was 500)
+/ar/creator/team     => 307 /ar/login?error=backend     (was 500)
+/ar/creator/earnings => 307 /ar/login?error=backend     (was 500)
+/ar/settings         => 307 /ar/login?error=backend     (was 500)
+/ar/report           => 307 /ar/login?error=backend     (was 500)
+/ar/review           => 307 /ar/login?error=backend     (was 500)
+/ar/account/progression => 307 /ar/login?error=backend  (was 500)
+/ar/creator/library/demo/edit => 307 /ar/login?error=backend
+```
+
+Public routes still return `200` with no backend: `/ar`, `/en`, `/discover`,
+`/works`, `/creators`, `/communities`, `/about`, `/login`.
+
+With the backend configured, behaviour is unchanged (`307` to plain `/login`),
+and the new bilingual `error=backend` notice renders on the sign-in page in both
+locales. Four new tests cover the guard → 20 total.
+
+---
+
 ## 6. Claims I checked and did NOT confirm as defects
 
 Recorded so they are not repeated as facts:
@@ -286,7 +327,7 @@ Recorded so they are not repeated as facts:
 |---|---|
 | **BLOCKER (product)** | Supabase has **no tables**. Every authenticated surface (profile, creator studio, library, team, review, reporting) will fail at runtime until migrations are applied — which requires founder approval and a management token. |
 | **BLOCKER (auth)** | Google OAuth is **disabled** in the Supabase project (`google: false`). The "Continue with Google" button cannot work end-to-end. |
-| HIGH | 13 authenticated routes still call `createClient()` unconditionally, so they return 500 (instead of redirecting to sign-in) if the backend is absent. Deliberately out of this batch's scope. |
+| ~~HIGH~~ FIXED | Authenticated routes no longer 500 without a backend: all 13 pages, 2 server actions, the login actions and the OAuth callback now redirect to `/login?error=backend` (commit `027b073`). |
 | MEDIUM | Hero, creator, and studio visuals hotlink `images.unsplash.com` in `globals.css` — third-party stock imagery, extra origin, no brand control. Needs a design decision. |
 | MEDIUM | `docs/ROADMAP.md` (in commit `b853049`) marks three Phase-3 items as `[x]`, including "Select media storage and processing architecture". **I found no storage integration, configuration, or credentials** to support that. Treat as unverified until evidence is supplied. |
 | LOW | `.rv-brand-mark` (Georgia monogram) and `.rv-logo span` colour rules are now dead CSS. |
