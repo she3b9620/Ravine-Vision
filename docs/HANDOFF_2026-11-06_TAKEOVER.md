@@ -414,7 +414,7 @@ Recorded so they are not repeated as facts:
 | ~~HIGH~~ FIXED | Authenticated routes no longer 500 without a backend: all 13 pages, 2 server actions, the login actions and the OAuth callback now redirect to `/login?error=backend` (commit `027b073`). |
 | MEDIUM | Hero, creator, and studio visuals hotlink `images.unsplash.com` in `globals.css` — third-party stock imagery, extra origin, no brand control. Needs a design decision. |
 | MEDIUM | `docs/ROADMAP.md` (in commit `b853049`) marks three Phase-3 items as `[x]`, including "Select media storage and processing architecture". **I found no storage integration, configuration, or credentials** to support that. Treat as unverified until evidence is supplied. |
-| LOW | `.rv-brand-mark` (Georgia monogram) and `.rv-logo span` colour rules are now dead CSS. |
+| ~~LOW~~ FIXED | Dead CSS removed: `.rv-logo span`, `.rv-brand-mark` (+ its mobile override), `.rv-work-status`, `.rv-creator-link`, `.rv-community-link` (`4ee627b`). |
 | LOW | `avenir-arabic-regular.otf` is not registered — it duplicates the `book` 400 weight. Kept on disk. |
 
 ---
