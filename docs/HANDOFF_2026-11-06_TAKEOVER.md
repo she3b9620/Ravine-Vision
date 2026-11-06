@@ -1,4 +1,4 @@
-# RAVINE VISION — Takeover Handoff
+﻿# RAVINE VISION — Takeover Handoff
 
 **Date:** 2026-11-06
 **Repository:** `she3b9620/Ravine-Vision`
@@ -89,7 +89,7 @@ should be added to the client.
 |---|---|---|
 | `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
 | Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
-| Local HEAD after | `028ae48` | `feat(security): add baseline security headers and record the CSP decision` |
+| Local HEAD after | `cc6a811` | `test(db): enforce the migration contract without a live database` |
 
 Two local commits were already ahead of `origin` when the session started
 (`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
@@ -102,7 +102,7 @@ Two local commits were already ahead of `origin` when the session started
 |---|---|---|---|
 | Production build | `npm run build` | ✅ 39 routes, Next.js 16.4.5 (Turbopack) | ✅ 40 routes (+`/icon.png`) |
 | Lint | `npx eslint .` | ⚠️ 1 warning (`empty-state.tsx`: unused `locale`) | ✅ **0 problems** |
-| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **5 files / 24 tests passed** |
+| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **6 files / 29 tests passed** |
 
 ---
 
@@ -523,7 +523,7 @@ All 13 `SECURITY DEFINER` functions pin `set search_path`, so none is exposed to
 search-path hijacking. Function grants are limited to `authenticated`; `public`
 and `anon` are explicitly revoked.
 
-### Guard added (commit `9a2dbf5`)
+### Guard added (commit `cc6a811`)
 
 `src/lib/schema-contract.test.ts` turns this audit into 5 permanent checks that
 run with `npm test`, no database required:
