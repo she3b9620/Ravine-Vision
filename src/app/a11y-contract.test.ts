@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 // vitest runs from the project root; resolve avoids relying on import.meta.url,
@@ -32,5 +32,18 @@ describe('stylesheets accessibility contract', () => {
     expect(lightAccent).not.toBeNull()
     const rule = css.slice(css.indexOf('html[data-theme="light"] :is('), css.indexOf('#70402F', css.indexOf('html[data-theme="light"] :is(')) + 7)
     expect(rule).toContain('#70402F')
+  })
+
+  it('ships every font file it references (a missing file means silent fallback)', () => {
+    const referenced = [...css.matchAll(/url\("(\/fonts\/[^"]+)"\)/g)].map((m) => m[1])
+    expect(referenced.length).toBeGreaterThan(0)
+
+    const missing = referenced.filter((url) => !existsSync(resolve(process.cwd(), 'public', url.replace(/^\//, ''))))
+    expect(missing, `fonts referenced but absent: ${missing.join(', ')}`).toEqual([])
+  })
+
+  it('serves woff2 rather than uncompressed otf', () => {
+    expect(css).not.toMatch(/\.otf"\)\s*format\("opentype"\)/)
+    expect(css).toMatch(/\.woff2"\)\s*format\("woff2"\)/)
   })
 })

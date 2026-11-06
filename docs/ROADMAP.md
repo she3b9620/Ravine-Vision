@@ -27,7 +27,7 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [x] Select new isolated database and authentication services.
 - [x] Select media storage and processing architecture.
 - [x] Implement audit, privacy, export, deletion, and consent foundations.
-- [ ] Add payments only after legal, tax, country, and policy decisions are approved.
+- [x] Add payments only after legal, tax, country, and policy decisions are approved.
 
 ## Phase 4 — Audience and creator workflows
 - [ ] Discovery and viewing.
