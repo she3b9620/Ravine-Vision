@@ -506,3 +506,4 @@ html[data-theme="light"] :is(.rv-shell,.rv-discover-page) :is(.rv-kicker,.rv-eye
 .rv-state-actions{display:flex;align-items:center;gap:14px;margin-top:26px}
 .rv-state-actions button{border:0;border-radius:3px;background:#c47a52;color:#100d0b;font:600 13px "Avenir Arabic",system-ui,sans-serif;padding:12px 20px;cursor:pointer}
 .rv-state-actions span{font-size:12px;color:#a89e90}
+.rv-auth-unavailable{margin:0 0 14px;padding:11px 13px;border:1px dashed #ffffff30;border-radius:4px;font-size:11px;line-height:1.7;color:#cfc6b8}

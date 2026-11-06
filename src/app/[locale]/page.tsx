@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import RAVINEControls from "@/components/ravine-controls";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
+import { getAuthProviders } from "@/lib/auth-providers";
 import MemberHome from "@/components/member-home";
 import type { User } from "@supabase/supabase-js";
 
@@ -85,6 +86,8 @@ export default async function LocalizedHome({ params }: { params: Promise<{ loca
   if (user) return <MemberHome locale={locale} displayName={String(user.user_metadata?.display_name ?? user.email?.split("@")[0] ?? (locale === "ar" ? "عضو رافين" : "RAVINE member"))} email={user.email ?? ""} />;
   const t = content[locale];
   const ar = locale === "ar";
+  // Only offer an identity provider that Supabase actually has enabled.
+  const { google: googleEnabled } = await getAuthProviders();
   return (
     <main className={`rv-shell ${ar ? "rv-ar" : "rv-en"}`} dir={ar ? "rtl" : "ltr"}>
       <aside className="rv-sidebar">
@@ -98,7 +101,7 @@ export default async function LocalizedHome({ params }: { params: Promise<{ loca
       <div className="rv-main">
         <header className="rv-topbar">
           <span className="rv-top-context">{ar ? "عالم من الإبداع والمعرفة" : "A universe of creativity & knowledge"}</span>
-          <div><a className="rv-login-link" href={`/${locale}/login`}>{ar ? "تسجيل الدخول" : "Sign in"}</a><RAVINEControls locale={locale}/></div>
+          <div><a className="rv-login-link" href={`/${locale}/login`}>{ar ? "تسجيل الدخول" : "Sign in"}</a><RAVINEControls locale={locale} googleEnabled={googleEnabled}/></div>
         </header>
 
         <section className="rv-welcome">
