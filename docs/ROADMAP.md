@@ -49,3 +49,7 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   identity, staff review queue, publish/return decisions with audit records, creator
   review notes, and public `/works` listing and detail pages. See
   [Work Publishing Workflow](WORK_PUBLISHING.md).
+- **2026-11-06** — With explicit founder authorization, the full isolated migration
+  set was applied to the `ravine-vision` Supabase project, and a preview deployment
+  was published on Vercel for the `preview/vercel-review` branch. No production
+  deployment and no changes to `main` or the legacy repositories.
