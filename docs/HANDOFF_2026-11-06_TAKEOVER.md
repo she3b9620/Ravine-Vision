@@ -486,6 +486,60 @@ Sweep after the change: 43 routes, `16×200`, `27×307`, **0×5xx** — unchange
 
 ---
 
+## 5i. Round 8 — database security audit of the migrations (static, no DB)
+
+The migrations cannot be executed under the standing rules, so their security
+posture was reviewed statically. Result: **well hardened, no defects found.**
+
+### Row level security
+
+| Check | Result |
+|---|---|
+| Public tables created | 19 |
+| Tables with `enable row level security` | **19 / 19** |
+| Policies defined | 57 |
+| Tables with RLS but **zero** policies (would always return empty) | **0** |
+| Policy commands | select 25, insert 19, update 9, delete 2, all 2 |
+
+Policy density per table ranges from 1 to 5. The two `for all` policies are
+correctly scoped, both with a matching `WITH CHECK`:
+
+- `work_media` — restricted to the owner of the parent work;
+- `work_reactions` — restricted to `account_id = auth.uid()`.
+
+Policies consistently use the `(select auth.uid())` form, which lets Postgres
+evaluate it once per statement instead of once per row.
+
+### Private data
+
+`app_private` is a schema (not a public table) holding `staff_roles`, with
+`revoke all on schema app_private from public, anon, authenticated` and the same
+revoke on the table and on its helper function. Only `SECURITY DEFINER`
+functions reach it — the correct pattern.
+
+### Privilege escalation
+
+All 13 `SECURITY DEFINER` functions pin `set search_path`, so none is exposed to
+search-path hijacking. Function grants are limited to `authenticated`; `public`
+and `anon` are explicitly revoked.
+
+### Guard added (commit `9a2dbf5`)
+
+`src/lib/schema-contract.test.ts` turns this audit into 5 permanent checks that
+run with `npm test`, no database required:
+
+1. every table queried by the app is created by a migration;
+2. every RPC called by the app is defined by a migration;
+3. every table has RLS enabled;
+4. every table has at least one policy;
+5. every `SECURITY DEFINER` function pins `search_path`.
+
+The guard was mutation-tested: injecting a `.from("definitely_missing_table")`
+call makes check 1 fail with a precise message, and removing it restores green.
+A guard that cannot fail would be worthless.
+
+---
+
 ## 6. Claims I checked and did NOT confirm as defects
 
 Recorded so they are not repeated as facts:
