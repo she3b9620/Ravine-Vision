@@ -24,9 +24,9 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [x] Define economy ledger and payout contracts without rates or providers.
 
 ## Phase 3 — Controlled service integration
-- [ ] Select new isolated database and authentication services.
-- [ ] Select media storage and processing architecture.
-- [ ] Implement audit, privacy, export, deletion, and consent foundations.
+- [x] Select new isolated database and authentication services.
+- [x] Select media storage and processing architecture.
+- [x] Implement audit, privacy, export, deletion, and consent foundations.
 - [ ] Add payments only after legal, tax, country, and policy decisions are approved.
 
 ## Phase 4 — Audience and creator workflows
