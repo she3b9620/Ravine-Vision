@@ -42,7 +42,7 @@ describe('public discovery integrity', () => {
 
     expect(container.querySelectorAll('a[href*="/creators/"]').length).toBe(0)
     expect(container.querySelectorAll('.rv-creator-works').length).toBe(0)
-    expect(screen.getAllByText('مثال توضيحي').length).toBeGreaterThan(0)
+    expect(screen.getByText('لا يوجد مبدعون معتمدون علنًا بعد.')).toBeDefined()
   })
 
   it('communities page does not link to missing communities or offer a dead join action', async () => {
@@ -50,7 +50,7 @@ describe('public discovery integrity', () => {
 
     expect(container.querySelectorAll('a[href*="/communities/"]').length).toBe(0)
     expect(container.querySelectorAll('button:not([disabled])').length).toBe(0)
-    expect(screen.getAllByText('مثال توضيحي').length).toBeGreaterThan(0)
+    expect(screen.getByText('لا توجد مجتمعات عامة منشأة بعد.')).toBeDefined()
   })
 })
 

@@ -1,89 +1,82 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { getSupabaseEnvironment } from "@/lib/supabase/env";
 
-const placeholderCreators = [
-  {
-    id: "creator-1",
-    name: { ar: "صانع إبداع", en: "Creative Creator" },
-    handle: { ar: "creative_voice", en: "creative_voice" },
-    bio: { ar: "مبدع متخصص في الفنون البصرية والتصوير.", en: "Artist specializing in visual arts and photography." },
-    discipline: { ar: "فنون بصرية", en: "Visual Arts" },
-  },
-  {
-    id: "creator-2",
-    name: { ar: "مُحاضر", en: "Lecturer" },
-    handle: { ar: "mind_explorer", en: "mind_explorer" },
-    bio: { ar: "محاضر في مجال الفلسفة والعلوم.", en: "Lecturer in philosophy and science." },
-    discipline: { ar: "علم", en: "Knowledge" },
-  },
-];
+export const dynamic = "force-dynamic";
+
+type CreatorRow = {
+  id: string;
+  display_name: string;
+  handle: string | null;
+  biography: string | null;
+  discipline_tags: string[];
+};
 
 export default async function CreatorsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
 
+  let creators: CreatorRow[] = [];
+  if (getSupabaseEnvironment()) {
+    try {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("creator_identities")
+        .select("id,display_name,handle,biography,discipline_tags")
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(60);
+      creators = (data ?? []) as CreatorRow[];
+    } catch {
+      creators = [];
+    }
+  }
+
   return (
-    <main className="rv-creators-page" dir={ar ? "rtl" : "ltr"}>
-      <header className="rv-works-header">
-        <Link className="rv-brand" href={`/${locale}`}>
-          <i className="rv-logo-wordmark" role="img" aria-label="RAVINE" />
-        </Link>
-        <nav>
-          <Link href={`/${locale}`}>{ar ? "الرئيسية" : "Home"}</Link>
-          <Link href={`/${locale}/works`}>{ar ? "الأعمال" : "Works"}</Link>
-          <Link href={`/${locale}/creator`}>{ar ? "المبدع" : "Creator"}</Link>
-        </nav>
-      </header>
+    <main className="simple-page creators-page" dir={ar ? "rtl" : "ltr"}>
+      <Link className="back-link" href={`/${locale}`}>{ar ? "← الرئيسية" : "← Home"}</Link>
+      <p className="eyebrow">RAVINE / CREATORS</p>
+      <h1>{ar ? "وراء كل عمل، إنسان." : "Behind every work, a human voice."}</h1>
+      <p>
+        {ar
+          ? "مبدعون تم توثيق هوياتهم الإبداعية ونشر أعمالهم في رافين. الاكتشاف يبدأ من الهوية والسياق، لا مجرد عدد المتابعين."
+          : "Creators with verified creative identities and published works on RAVINE. Discovery begins with voice and context, not vanity metrics."}
+      </p>
 
-      <section className="rv-creators-hero">
-        <p className="rv-kicker"><i />CREATORS</p>
-        <h1>{ar ? "اكتشف المبدعين" : "Meet Creators"}</h1>
-        <p>
-          {ar
-            ? "وراء كل عمل إنسان. اكتشف هوياتهم الإبداعية وسبل التعبير عن أنفسهم."
-            : "There is a person behind every work. Discover their creative identities and expressions."}
-        </p>
-      </section>
-
-      <section className="rv-creators-grid">
-        <div className="rv-creators-heading">
-          <div>
-            <p className="rv-kicker"><i />CREATOR DISCOVERY</p>
-            <h2>{ar ? "المبدعون الإبداعيون" : "Creative Creators"}</h2>
-          </div>
-        </div>
-
-        <div className="rv-creator-cards">
-          {placeholderCreators.map((creator) => (
-            <article key={creator.id} className="rv-creator-card">
-              <span className="rv-example-badge">{ar ? "مثال توضيحي" : "Example"}</span>
-              <div className="rv-creator-avatar">{creator.name[ar ? "ar" : "en"][0]}</div>
-              <div className="rv-creator-info">
-                <h3>{creator.name[ar ? "ar" : "en"]}</h3>
-                <span className="rv-creator-handle">@{creator.handle[ar ? "ar" : "en"]}</span>
-                <p className="rv-creator-bio">{creator.bio[ar ? "ar" : "en"]}</p>
-                <div className="rv-creator-meta">
-                  <span className="rv-creator-discipline">{creator.discipline[ar ? "ar" : "en"]}</span>
+      {creators.length ? (
+        <div className="domain-grid creators-grid">
+          {creators.map((creator) => (
+            <Link className="domain-card public-creator-card" key={creator.id} href={`/${locale}/creators/${creator.id}`}>
+              <div className="creator-card-header">
+                <span className="creator-avatar-fallback">{creator.display_name.slice(0, 1) || "R"}</span>
+                <div>
+                  <h2>{creator.display_name}</h2>
+                  {creator.handle && <small className="creator-handle">@{creator.handle}</small>}
                 </div>
               </div>
-            </article>
+              <p>{creator.biography || (ar ? "هوية إبداعية معتمدة في رافين." : "A verified creative identity on RAVINE.")}</p>
+              {creator.discipline_tags?.length > 0 && (
+                <div className="creator-tags">
+                  {creator.discipline_tags.map((tag) => (
+                    <span key={tag} className="creator-tag">{tag}</span>
+                  ))}
+                </div>
+              )}
+            </Link>
           ))}
         </div>
-
-        <div className="rv-creators-placeholder">
-          <p className="rv-eyebrow">{ar ? "قريبًا" : "Coming soon"}</p>
-          <p>{ar ? "واجهة اكتشاف المبدعين الكاملة ستكون متوفرة مع بنية الحسابات والهويات الإبداعية." : "Full creator discovery interface will be ready with account and creative identity infrastructure."}</p>
+      ) : (
+        <div className="empty-catalog-state">
+          <p className="coming-note">{ar ? "لا يوجد مبدعون معتمدون علنًا بعد." : "No publicly approved creators yet."}</p>
+          <div className="empty-catalog-cta">
+            <Link className="action-button-accent" href={`/${locale}/creator`}>
+              {ar ? "تقديم طلب هوية إبداعية ↗" : "Apply for a Creative Identity ↗"}
+            </Link>
+          </div>
         </div>
-      </section>
-
-      <footer className="rv-home-footer">
-        <a className="rv-brand rv-footer-brand" href={`/${locale}`}>
-          <span className="rv-brand-lockup"><i className="rv-brand-wordmark" role="img" aria-label="RAVINE" /><small>THE PATH TO LIGHT</small></span>
-        </a>
-        <span>{ar ? "الكرامة · الإبداع · المعرفة · التقارب الإنساني" : "Dignity · Creativity · Knowledge · Human connection"}</span>
-        <span>© RAVINE</span>
-      </footer>
+      )}
     </main>
   );
 }

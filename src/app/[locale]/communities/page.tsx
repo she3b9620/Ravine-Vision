@@ -1,104 +1,87 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { getSupabaseEnvironment } from "@/lib/supabase/env";
 
-interface Community {
+export const dynamic = "force-dynamic";
+
+type CreatorRef = { display_name: string; handle: string | null };
+type CommunityRow = {
   id: string;
-  name: { ar: string; en: string };
-  description: { ar: string; en: string };
-  visibility: "public" | "invite-only";
-  owner: { ar: string; en: string };
-}
+  name: string;
+  description: string | null;
+  guidelines: string | null;
+  created_at: string;
+  creator_identities: CreatorRef | CreatorRef[] | null;
+};
 
-const placeholderCommunities: Community[] = [
-  {
-    id: "com-1",
-    name: { ar: "مجتمع السينما البشرية", en: "Human Cinema Community" },
-    description: { ar: "نقاش عن الأعمال السينمائية التي تعكس التجارب الإنسانية.", en: "Discussing films that reflect human experiences." },
-    visibility: "public",
-    owner: { ar: "مبدع غير محدد", en: "Unspecified Creator" },
-  },
-  {
-    id: "com-2",
-    name: { ar: "مجتمع الفنون المعاصرة", en: "Contemporary Arts Community" },
-    description: { ar: "مجموعة للمصورين والرسامين والمصممين.", en: "A group for photographers, painters, and designers." },
-    visibility: "public",
-    owner: { ar: "مبدع غير محدد", en: "Unspecified Creator" },
-  },
-];
+function creatorOf(community: CommunityRow) {
+  const creator = community.creator_identities;
+  if (!creator) return null;
+  return Array.isArray(creator) ? creator[0] ?? null : creator;
+}
 
 export default async function CommunitiesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
 
+  let communities: CommunityRow[] = [];
+  if (getSupabaseEnvironment()) {
+    try {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("communities")
+        .select("id,name,description,guidelines,created_at,creator_identities(display_name,handle)")
+        .eq("visibility", "public")
+        .order("created_at", { ascending: false })
+        .limit(60);
+      communities = (data ?? []) as CommunityRow[];
+    } catch {
+      communities = [];
+    }
+  }
+
   return (
-    <main className="rv-communities-page" dir={ar ? "rtl" : "ltr"}>
-      <header className="rv-works-header">
-        <Link className="rv-brand" href={`/${locale}`}>
-          <i className="rv-logo-wordmark" role="img" aria-label="RAVINE" />
-        </Link>
-        <nav>
-          <Link href={`/${locale}`}>{ar ? "الرئيسية" : "Home"}</Link>
-          <Link href={`/${locale}/works`}>{ar ? "الأعمال" : "Works"}</Link>
-          <Link href={`/${locale}/creator`}>{ar ? "المبدع" : "Creator"}</Link>
-        </nav>
-      </header>
+    <main className="simple-page communities-page" dir={ar ? "rtl" : "ltr"}>
+      <Link className="back-link" href={`/${locale}`}>{ar ? "← الرئيسية" : "← Home"}</Link>
+      <p className="eyebrow">RAVINE / COMMUNITIES</p>
+      <h1>{ar ? "المعنى يكبر بالمشاركة." : "Meaning deepens through community."}</h1>
+      <p>
+        {ar
+          ? "مساحات تتشكل حول الاهتمامات والأعمال والقضايا الفكرية والإبداعية، مع خصوصية وقواعد واضحة."
+          : "Spaces formed around shared interests, works, and creative inquiries, with clear guidelines and privacy."}
+      </p>
 
-      <section className="rv-communities-hero">
-        <p className="rv-kicker"><i />COMMUNITIES</p>
-        <h1>{ar ? "مجتمعات رافين" : "RAVINE Communities"}</h1>
-        <p>
-          {ar
-            ? "مجتمعات حول الاهتمامات والأعمال والمبدعين، مع مستويات خصوصية وإدارة واضحة."
-            : "Communities around interests, works, and creators, with clear privacy levels and management."}
-        </p>
-      </section>
-
-      <section className="rv-communities-list">
-        <div className="rv-communities-heading">
-          <div>
-            <p className="rv-kicker"><i />PUBLIC COMMUNITIES</p>
-            <h2>{ar ? "المجتمعات العامة" : "Public Communities"}</h2>
+      {communities.length ? (
+        <div className="domain-grid communities-grid">
+          {communities.map((com) => {
+            const creator = creatorOf(com);
+            return (
+              <Link className="domain-card public-community-card" key={com.id} href={`/${locale}/communities/${com.id}`}>
+                <span className="community-badge">{ar ? "مجتمع عام" : "PUBLIC"}</span>
+                <h2>{com.name}</h2>
+                <p>{com.description || (ar ? "مجتمع فكري وإبداعي في رافين." : "A creative and cultural community on RAVINE.")}</p>
+                {creator && (
+                  <small className="community-owner">
+                    {ar ? "المؤسس: " : "Organizer: "}
+                    {creator.handle ? "@" + creator.handle : creator.display_name}
+                  </small>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="empty-catalog-state">
+          <p className="coming-note">{ar ? "لا توجد مجتمعات عامة منشأة بعد." : "No public communities yet."}</p>
+          <div className="empty-catalog-cta">
+            <Link className="action-button-accent" href={`/${locale}/creator/community`}>
+              {ar ? "إنشاء مجتمع جديد ↗" : "Create a new community ↗"}
+            </Link>
           </div>
         </div>
-
-        <div className="rv-community-cards">
-          {placeholderCommunities.map((community) => (
-            <article key={community.id} className="rv-community-card">
-              <span className="rv-example-badge">{ar ? "مثال توضيحي" : "Example"}</span>
-              <div className="rv-community-info">
-                <h3>{community.name[ar ? "ar" : "en"]}</h3>
-                <p className="rv-community-desc">{community.description[ar ? "ar" : "en"]}</p>
-                <div className="rv-community-meta">
-                  <span className="rv-community-visibility">
-            {community.visibility === "public" ? (ar ? "علني" : "Public") : (ar ? "خاص" : "Private")}
-          </span>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <div className="rv-join-cta">
-          <p className="rv-eyebrow">{ar ? "هل أنت المبدع؟" : "Are you a creator?"}</p>
-          <Link href={`/${locale}/creator/community`} className="rv-community-create-btn">
-            {ar ? "إنشاء مجتمع" : "Create a community"} ↗
-          </Link>
-          <p className="rv-community-note">
-            {ar
-              ? "إنشاء مجتمع يتطلب هوية إبداعية نشطة."
-              : "Creating a community requires an active creative identity."}
-          </p>
-        </div>
-      </section>
-
-      <footer className="rv-home-footer">
-        <a className="rv-brand rv-footer-brand" href={`/${locale}`}>
-          <span className="rv-brand-lockup"><i className="rv-brand-wordmark" role="img" aria-label="RAVINE" /><small>THE PATH TO LIGHT</small></span>
-        </a>
-        <span>{ar ? "الكرامة · الإبداع · المعرفة · التقارب الإنساني" : "Dignity · Creativity · Knowledge · Human connection"}</span>
-        <span>© RAVINE</span>
-      </footer>
+      )}
     </main>
   );
 }

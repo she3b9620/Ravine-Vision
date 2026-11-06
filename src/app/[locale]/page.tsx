@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import RAVINEControls from "@/components/ravine-controls";
 import RAVINEOpenAuth from "@/components/open-auth-link";
+import GuestHeroShowcase from "@/components/guest-hero-showcase";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import { getAuthProviders } from "@/lib/auth-providers";
@@ -12,11 +13,6 @@ export const dynamic = "force-dynamic";
 const content = {
   ar: {
     nav: [["الرئيسية",""],["اكتشف","/discover"],["الأعمال","/works"],["المبدعون","/creators"],["المجتمعات","/communities"],["عن رافين","/about"]],
-    greeting: "مساحة للإبداع الإنساني والمعرفة",
-    title: "ما يستحق أن يُرى، يستحق أن يبقى.",
-    intro: "اكتشف عوالم من الإبداع والمعرفة والتجارب الإنسانية. شاهد، تعرّف على أصحاب الأعمال، وافهم سياقها قبل أن تنضم إلى رافين.",
-    explore: "ابدأ الاكتشاف",
-    about: "حكاية رافين",
     featured: "مسارات تستحق الاكتشاف",
     featuredText: "لا يقتصر رافين على شكل واحد من أشكال التعبير.",
     lanes: [["السينما والصورة","أفلام، وثائقيات، وصناعة الصورة","/works","01"],["الصوت والحوار","بودكاست، حكايات، ومساحات صوتية","/discover","02"],["الفنون والتعبير","تصوير، موسيقى، وفنون بصرية","/discover","03"],["المعرفة والفكر","كتب، أبحاث، ومحاضرات وأفكار","/discover","04"]],
@@ -39,11 +35,6 @@ const content = {
   },
   en: {
     nav: [["Home",""],["Discover","/discover"],["Works","/works"],["Creators","/creators"],["Communities","/communities"],["About","/about"]],
-    greeting: "A space for human creativity & knowledge",
-    title: "What deserves to be seen, deserves to last.",
-    intro: "Discover universes of human creativity, knowledge, and experience. Watch, get to know the creators, and understand their context before joining RAVINE.",
-    explore: "Begin exploring",
-    about: "About RAVINE",
     featured: "Paths worth discovering",
     featuredText: "RAVINE does not reduce human expression to a single medium.",
     lanes: [["Cinema & Image","Film, documentary, and visual storytelling","/works","01"],["Audio & Dialogue","Podcasts, oral histories, and audio spaces","/discover","02"],["Arts & Expression","Photography, music, and visual arts","/discover","03"],["Knowledge & Thought","Books, research, lectures, and ideas","/discover","04"]],
@@ -107,16 +98,7 @@ export default async function LocalizedHome({ params }: Props) {
           <div><RAVINEOpenAuth className="rv-login-link">{ar ? "تسجيل الدخول" : "Sign in"}</RAVINEOpenAuth><RAVINEControls locale={locale} googleEnabled={googleEnabled}/></div>
         </header>
 
-        <section className="rv-welcome">
-          <div className="rv-welcome-copy">
-            <p className="rv-kicker"><i />{t.greeting}</p>
-            <h1>{t.title}</h1>
-            <p className="rv-intro">{t.intro}</p>
-            <div className="rv-welcome-actions"><a className="rv-action-primary" href={`/${locale}/discover`}>{t.explore}<span>↗</span></a><a className="rv-action-text" href={`/${locale}/about`}>{t.about}</a></div>
-          </div>
-          <div className="rv-welcome-art" aria-label={ar ? "تكوين بصري تجريدي" : "Abstract visual composition"}><div className="rv-art-glow" /><div className="rv-art-ring ring-a" /><div className="rv-art-ring ring-b" /><div className="rv-art-caption">R / 001 <span>THE PATH TO LIGHT</span></div></div>
-          <span className="rv-welcome-index">01 — 04</span>
-        </section>
+        <GuestHeroShowcase locale={locale} />
 
         <section className="rv-discovery-block">
           <div className="rv-block-heading"><div><p className="rv-kicker"><i />DISCOVER YOUR NEXT WORLD</p><h2>{t.featured}</h2><p>{t.featuredText}</p></div><a href={`/${locale}/discover`}>{t.all} ↗</a></div>
