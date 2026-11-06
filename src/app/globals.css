@@ -490,3 +490,19 @@ a:focus-visible,button:focus-visible,summary:focus-visible,[role="button"]:focus
    Scoped to the surfaces that actually have light-theme rules, so pages that
    stay dark (creator, works, creators, communities) are untouched. */
 html[data-theme="light"] :is(.rv-shell,.rv-discover-page) :is(.rv-kicker,.rv-eyebrow,.rv-category b,.rv-category>span,.rv-world-number,.rv-nav-glyph,.rv-block-heading>a,.rv-world-card>b,.rv-feature-copy>a,.rv-social-card>span,.rv-social-card>b,.rv-creator-emblem>span,.rv-side-bottom>a,.rv-side-language a,.rv-guest-mark,.rv-discover-next a){color:#70402F}
+
+/* ── Branded route states: 404, error boundary, loading skeleton ── */
+.rv-state{min-height:100vh;display:grid;place-items:center;padding:clamp(28px,7vw,80px);background:radial-gradient(ellipse at 30% 18%,rgba(24,63,70,.38),transparent 55%),#090909;color:#f1e9dc}
+.rv-state-inner{width:100%;max-width:620px}
+.rv-state-kicker{display:flex;align-items:center;gap:10px;margin:0 0 22px;font:10px "Avenir Arabic",system-ui,sans-serif;letter-spacing:.18em;color:#d49a78}
+.rv-state-kicker i{width:24px;height:1px;background:#c47a52;display:inline-block}
+.rv-state h1{margin:0 0 10px;font:600 clamp(30px,5vw,46px)/1.28 "Avenir Arabic",system-ui,sans-serif;color:#f1e9dc}
+.rv-state-title-en{margin:0 0 24px;font-size:15px;color:#d49a78;letter-spacing:.02em}
+.rv-state-body{margin:0 0 10px;max-width:56ch;font-size:14px;line-height:1.85;color:#cfc6b8}
+.rv-state-body-en{font-size:13px;color:#a89e90}
+.rv-state-links{display:flex;flex-wrap:wrap;gap:18px;margin-top:30px}
+.rv-state-links a{padding-bottom:4px;border-bottom:1px solid #c47a52;font-size:13px;transition:color .2s}
+.rv-state-links a:hover{color:#d49a78}
+.rv-state-actions{display:flex;align-items:center;gap:14px;margin-top:26px}
+.rv-state-actions button{border:0;border-radius:3px;background:#c47a52;color:#100d0b;font:600 13px "Avenir Arabic",system-ui,sans-serif;padding:12px 20px;cursor:pointer}
+.rv-state-actions span{font-size:12px;color:#a89e90}
