@@ -89,7 +89,7 @@ should be added to the client.
 |---|---|---|
 | `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
 | Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
-| Local HEAD after | `87c7849` | `fix(a11y): global reduced motion, themed focus ring, readable light-theme accents` |
+| Local HEAD after | `028ae48` | `feat(security): add baseline security headers and record the CSP decision` |
 
 Two local commits were already ahead of `origin` when the session started
 (`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
@@ -434,6 +434,55 @@ Verified in the built stylesheet: `:focus-visible` ×11,
 `prefers-reduced-motion` ×4 (including the global one), `#70402f` ×5.
 A 4-test contract guard (`src/app/a11y-contract.test.ts`) reads `globals.css`
 so these cannot silently disappear.
+
+---
+
+## 5h. Round 7 — directional CSS audit and baseline security headers
+
+### RTL/LTR audit: already correct, no change needed
+
+A LOCKED requirement (§50, decisions 6–7) is that RTL and LTR are first-class and
+that CSS is not blindly mirrored. The stylesheet was scanned for physical
+direction properties:
+
+| Physical property | Count |
+|---|---|
+| `margin-left` / `margin-right` | 0 |
+| `padding-left` / `padding-right` | 0 |
+| `left:` / `right:` | 0 |
+| `text-align: left/right` | 0 |
+| `border-left` / `border-right` | 0 |
+| `float` | 0 |
+
+Logical properties in use instead: `inset-inline` ×15, `border-inline` ×4,
+`margin-inline` ×3, `padding-inline` ×1. The brand wordmark also swaps to the
+Arabic lockup under `[dir="rtl"]`. This is a genuinely clean RTL implementation —
+recorded as a positive finding rather than silently ignored.
+
+### Security headers: added (commit `028ae48`)
+
+Live production returned only HSTS (from the Vercel platform) — none of
+`nosniff`, `Referrer-Policy`, frame protection, or `Permissions-Policy`.
+
+Added in `next.config.ts` for every path, verified on a local production build
+across `/ar`, `/en`, `/ar/login`, a brand image and `/icon.png`:
+
+| Header | Value |
+|---|---|
+| `X-Content-Type-Options` | `nosniff` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `X-Frame-Options` | `SAMEORIGIN` |
+| `Permissions-Policy` | `geolocation=(), payment=(), usb=()` |
+
+Two deliberate omissions, both recorded in `docs/OPEN_DECISIONS.md`:
+
+- **CSP deferred.** Next injects inline bootstrap scripts and the UI uses inline
+  style attributes; a naive policy would break rendering, and a permissive one
+  would give false comfort. It needs a nonce strategy first.
+- **camera / microphone not denied.** RAVINE plans Live audio/video; denying now
+  would have to be reversed later.
+
+Sweep after the change: 43 routes, `16×200`, `27×307`, **0×5xx** — unchanged.
 
 ---
 
