@@ -7,13 +7,13 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [x] Establish Next.js, React, and TypeScript application shell.
 - [x] Establish initial Arabic/English landing experience.
 - [x] Record charter, architecture boundaries, open decisions, and economy scope.
-- [ ] Verify install, lint, and production build in a real execution environment.
+- [x] Verify install, lint, and production build in a real execution environment (2026-11-06).
 
 ## Phase 1 — Product skeleton
 - [x] Define shared brand and navigation models.
 - [x] Define initial work taxonomy and account/creator identity concepts.
 - [x] Add locale-prefixed landing, discovery, and about routes.
-- [ ] Add works, creators, communities, and creator-space route shells.
+- [x] Add works, creators, communities, and creator-space route shells.
 - [ ] Add shared accessible UI primitives and empty/loading/error states.
 - [ ] Add route and component tests.
 
@@ -41,4 +41,11 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [ ] Sustainable monetization experiments with explicit approvals.
 - [ ] Reliability, observability, accessibility, and performance hardening.
 
-No deployment, legacy migration, or production integration is authorized by this roadmap.
+No legacy migration or production integration beyond the isolated `ravine-vision` Vercel and Supabase projects is authorized by this roadmap.
+
+## Delivery log
+
+- **2026-11-06** — Controlled work publishing: creator submission from an active
+  identity, staff review queue, publish/return decisions with audit records, creator
+  review notes, and public `/works` listing and detail pages. See
+  [Work Publishing Workflow](WORK_PUBLISHING.md).

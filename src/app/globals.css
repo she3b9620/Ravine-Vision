@@ -308,6 +308,9 @@ h1 { white-space: pre-line; font-size: clamp(52px, 6.6vw, 92px); line-height: 1.
 .rv-global-controls{display:inline-flex;align-items:center;gap:7px;margin-inline-end:10px}
 .rv-global-controls button{height:36px;min-width:38px;padding:0 10px;border:1px solid #ffffff30;background:transparent;color:var(--rv-cream,#f1e9dc);font:11px inherit;cursor:pointer;transition:background .22s,border-color .22s,color .22s}
 .rv-global-controls button:hover{border-color:#c47a52;background:#c47a5218}
+.rv-theme-glyph{display:inline-block;line-height:1}
+html[data-theme="light"] .rv-theme-sun{display:none}
+html:not([data-theme="light"]) .rv-theme-moon{display:none}
 .rv-modal-trigger{border:0;background:#c47a52;color:#100d0b;padding:12px 17px;font:600 12px inherit;cursor:pointer;transition:transform .2s,background .2s}
 .rv-modal-trigger:hover{transform:translateY(-2px);background:#d49a78}
 .rv-auth-backdrop{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:22px;background:rgba(0,0,0,.72);backdrop-filter:blur(14px);animation:rv-fade-in .22s ease both}
@@ -376,3 +379,15 @@ html[data-theme="light"] .rv-discover-tabs button.active{color:#100d0b}
 html[data-theme="light"] .rv-discover-selection{background:#fffaf2;border-color:#15171925}
 html[data-theme="light"] .rv-discover-selection p{color:#554c43}
 @media(max-width:700px){.rv-discover-header nav{display:none}.rv-discover-hero{padding:65px 0 50px}.rv-discover-selection{grid-template-columns:1fr;gap:10px;padding:25px}.rv-discover-next{flex-direction:column;gap:10px}}
+
+/* Published works and review feedback */
+.creator-work-list .creator-team-actions{align-items:center}
+.creator-work-list .creator-team-actions form{margin:0}
+.creator-review-note{padding:10px 12px;border-inline-start:2px solid #c47a52;background:#c47a5212;border-radius:4px;font-size:12px!important;color:#d8cfc3!important}
+.works-grid{padding-top:45px}
+.public-work-card{display:block;transition:border-color .2s,background .2s}
+.public-work-card:hover{border-color:#c47a5270;background:#172426}
+.public-work-card small{display:block;margin-top:18px;color:#8f918d;font-size:10px;line-height:1.7}
+.simple-page>p.work-creator{margin:0 0 22px;color:#d49a78;font-size:14px;line-height:1.8}
+.simple-page>p.work-creator-bio{font-size:13px;color:#aaa69e;border-inline-start:2px solid #c47a52;padding-inline-start:14px;max-width:650px}
+.work-meta{display:flex;flex-wrap:wrap;gap:18px;margin:34px 0;color:#8f918d;font-size:12px;border-top:1px solid #ffffff1c;padding-top:18px;max-width:760px}

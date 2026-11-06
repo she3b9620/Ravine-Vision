@@ -29,9 +29,16 @@ Open http://localhost:3000.
 ## Current foundation
 
 - Next.js App Router + React + TypeScript.
-- Responsive bilingual-ready landing experience (Arabic/RTL and English/LTR).
-- No database, storage provider, payment processor, analytics vendor, or external service is connected yet.
-- No deployment is configured by this repository foundation.
+- Responsive bilingual ready experience (Arabic/RTL and English/LTR).
+- Supabase authentication and a restrictive RLS database contract.
+- Personal accounts, multiple creator identities, creator applications, account
+  tier requests, work drafts, media metadata, rights declarations, creator teams,
+  and a trusted review console.
+- Controlled work publishing: private draft, creator submission, staff review, and
+  public discovery for approved public works.
+- No media storage provider, payment processor, analytics vendor, or payout
+  provider is connected yet.
+- Production hosting is configured on Vercel for this repository.
 
 ## Project boundaries
 
@@ -41,4 +48,5 @@ See:
 - [Foundation Charter](docs/FOUNDATION_CHARTER.md)
 - [Architecture Principles](docs/ARCHITECTURE_PRINCIPLES.md)
 - [Open Decisions](docs/OPEN_DECISIONS.md)
+- [Work Publishing Workflow](docs/WORK_PUBLISHING.md)
 - [Economy and Monetization](docs/ECONOMY_AND_MONETIZATION.md)

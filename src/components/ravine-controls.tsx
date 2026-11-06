@@ -6,16 +6,12 @@ import { signInWithGoogleAction } from "@/app/[locale]/auth/actions";
 export default function RAVINEControls({ locale }: { locale: "ar" | "en" }) {
   const ar = locale === "ar";
   const [open, setOpen] = useState(false);
-  const [light, setLight] = useState(false);
   useEffect(() => {
     const saved = window.localStorage.getItem("ravine-theme");
-    const next = saved === "light";
-    setLight(next);
-    document.documentElement.dataset.theme = next ? "light" : "dark";
+    document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
   }, []);
   function toggleTheme() {
-    const next = !light;
-    setLight(next);
+    const next = document.documentElement.dataset.theme !== "light";
     document.documentElement.dataset.theme = next ? "light" : "dark";
     window.localStorage.setItem("ravine-theme", next ? "light" : "dark");
   }
@@ -27,7 +23,7 @@ export default function RAVINEControls({ locale }: { locale: "ar" | "en" }) {
   return <>
     <div className="rv-global-controls">
       <button type="button" onClick={switchLocale} aria-label={ar ? "تغيير اللغة" : "Change language"}>{ar ? "EN" : "عربي"}</button>
-      <button type="button" onClick={toggleTheme} aria-label={ar ? "تغيير وضع العرض" : "Toggle appearance"}>{light ? "☾" : "☼"}</button>
+      <button type="button" onClick={toggleTheme} aria-label={ar ? "تغيير وضع العرض" : "Toggle appearance"}><span className="rv-theme-glyph rv-theme-sun">☼</span><span className="rv-theme-glyph rv-theme-moon">☾</span></button>
     </div>
     <button type="button" className="rv-modal-trigger" onClick={() => setOpen(true)}>{ar ? "إنشاء حساب" : "Create account"}</button>
     {open && <div className="rv-auth-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) setOpen(false); }}>

@@ -1,6 +1,10 @@
 -- Include expired pending invitations in the invitee's private inbox so expiry is visible.
 -- Expiry remains enforced by the response RPC; this listing does not mutate state.
 
+-- PostgreSQL cannot change a function's OUT row type with CREATE OR REPLACE.
+-- The previous signature from migration 01400 must be dropped first.
+drop function if exists public.list_my_pending_creator_team_invitations();
+
 create or replace function public.list_my_pending_creator_team_invitations()
 returns table (
   invitation_id uuid,
