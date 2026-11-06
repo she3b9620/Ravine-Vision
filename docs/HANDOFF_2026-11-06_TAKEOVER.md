@@ -1,4 +1,4 @@
-# RAVINE VISION — Takeover Handoff
+﻿# RAVINE VISION — Takeover Handoff
 
 **Date:** 2026-11-06
 **Repository:** `she3b9620/Ravine-Vision`
@@ -74,7 +74,7 @@ should be added to the client.
 |---|---|---|
 | `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
 | Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
-| Local HEAD after | `43dc5dc` | `fix(discovery): remove dead links and fabricated activity from public sections` |
+| Local HEAD after | `4130309` | `fix(auth): derive redirect origin from the request instead of hardcoding localhost` |
 
 Two local commits were already ahead of `origin` when the session started
 (`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
@@ -87,7 +87,7 @@ Two local commits were already ahead of `origin` when the session started
 |---|---|---|---|
 | Production build | `npm run build` | ✅ 39 routes, Next.js 16.4.5 (Turbopack) | ✅ 40 routes (+`/icon.png`) |
 | Lint | `npx eslint .` | ⚠️ 1 warning (`empty-state.tsx`: unused `locale`) | ✅ **0 problems** |
-| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **2 files / 8 tests passed** |
+| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ **3 files / 16 tests passed** |
 
 ---
 
@@ -223,6 +223,46 @@ content now depends on the URL.
 Six new regression tests (`src/app/discovery-integrity.test.tsx`) assert no
 dead detail links, no fabricated counters, no dead CTA, correct deep-link
 selection, unknown-category fallback, and URL write-back on tab change.
+
+---
+
+## 5c. Round 3 — auth redirects pointed at localhost in production
+
+**Verified defect.** `NEXT_PUBLIC_SITE_URL` was never configured in Vercel
+(authoritative check: `vercel env ls` lists only the two Supabase variables),
+yet `src/app/[locale]/auth/actions.ts` used
+`process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"` for both redirect
+targets. In production that meant:
+
+- every email-confirmation link (`emailRedirectTo`) pointed at `localhost:3000`;
+- the Google OAuth `redirectTo` pointed at `localhost:3000`.
+
+An environment-only fix was not possible within the no-console-change rule, so
+the code now derives the origin from the request.
+
+`src/lib/site-origin.ts`:
+
+- an explicit `NEXT_PUBLIC_SITE_URL` still wins (trimmed of trailing slashes);
+- otherwise the origin comes from `x-forwarded-host` / `x-forwarded-proto`;
+- the host is validated against a strict hostname pattern and the first value of
+  a proxy list is used, so a forged `Host` header cannot turn the OAuth redirect
+  into an open redirect.
+
+Covered by 8 unit tests (`src/lib/site-origin.test.ts`), including the
+open-redirect rejection cases (`evil.example/path`, `?x=1`, `user@host`,
+`host:notaport`).
+
+Runtime check — `/ar/auth/callback` with no code redirects to the **real**
+request origin rather than the hardcoded port:
+
+```
+/ar/auth/callback => 307  http://localhost:3041/ar/login?error=callback
+/ar/login         => 200
+/en/login         => 200
+```
+
+End-to-end confirmation of the full signup/OAuth round trip is still blocked:
+Google is disabled in Supabase and no mail provider is configured.
 
 ---
 
