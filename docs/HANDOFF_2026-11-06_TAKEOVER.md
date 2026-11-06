@@ -1,0 +1,228 @@
+# RAVINE VISION — Takeover Handoff
+
+**Date:** 2026-11-06
+**Repository:** `she3b9620/Ravine-Vision`
+**Branch:** `preview/vercel-review`
+**Deployment status:** **NOT DEPLOYED.** No Vercel deployment, no push, no database change.
+
+---
+
+## ملخص تنفيذي (Arabic summary)
+
+تم التحقق من الحالة الفعلية للمشروع على GitHub وVercel وSupabase بأدلة حقيقية،
+ثم نُفِّذت أول دفعة إصلاحات مترابطة داخل النطاق المصرح به:
+
+1. **الشعار الرسمي** أصبح مدمجًا فعليًا (كان نصًا فقط: `RAVINE.`).
+2. **خط Avenir Arabic** من حزمة المؤسس أصبح مستضافًا ذاتيًا، وأُزيل الاعتماد
+   على Google Fonts الخارجي.
+3. **إصلاح خلل مُثبت**: الصفحة الرئيسية كانت تُرجع **500** عند غياب متغيرات
+   Supabase. الآن تُرجع **200** (تم البناء والاختبار فعليًا بدون المتغيرات).
+
+**غير منشور:** لم يتم Push ولم يتم Deploy، لأن Push على هذا الفرع يشغّل
+Preview Deployment تلقائيًا عبر تكامل Vercel.
+
+---
+
+## 1. Access and control status (verified)
+
+| Service | Status | Evidence |
+|---|---|---|
+| **GitHub** | ✅ Authenticated as `she3b9620` | `gh auth status` → token scopes `repo`, `workflow`, `gist`, `read:org` |
+| **Vercel** | ✅ Authenticated as `she3b9620` | `vercel whoami` → `she3b9620`; CLI 65.12.1 (native) |
+| **Vercel project** | ✅ Linked | `ravine-vision` / `prj_P0RvrYqQcsraVTtpjsRjskeDSkBI` / team `team_rxy3B37uy6vUZ7dU87jn8SnK` |
+| **Supabase** | ⚠️ Partial — data-plane only | Project `pkgtxlmfzsvjarfdhhov` reachable (GoTrue `v2.197.0` health 200). **No management access token available**, so control-plane actions (settings, branches, SQL, logs) are not possible. |
+
+### Vercel Git integration — critical operational fact
+
+The project is connected to GitHub (`productionBranch: main`), and any push to
+`preview/vercel-review` **automatically creates a Preview deployment**
+(observed: `dpl_CqxBnQsbAaSPGEzfhdfFwPTzD4Mk`, branch alias
+`ravine-vision-git-preview-vercel-review-she3b9620.vercel.app`).
+
+**Consequence:** `git push` on this branch is equivalent to deploying.
+Under the standing LOCKED rule ("no deploy, even Preview, without explicit
+request"), work is committed locally only.
+
+### Verified Supabase project state
+
+- Auth health: `200` — project is live.
+- `GET /rest/v1/works` → `404` `PGRST205` — *"Could not find the table
+  'public.works' in the schema cache"*.
+- Therefore the 15 migration files in `supabase/migrations/` **have never been
+  applied** to this project. The database is empty.
+- `GET /auth/v1/settings` → `"google": false`, `"email": true`,
+  `"mailer_autoconfirm": false`.
+
+This closes an open question from the previous handoff: *Google OAuth is not
+merely untested — the provider is disabled in Supabase, and no tables exist to
+support any authenticated flow.*
+
+### Vercel environment variables (names only, values not read)
+
+`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — both present
+in Development, Preview, Production. No service-role key is configured, and none
+should be added to the client.
+
+---
+
+## 2. HEAD before and after
+
+| | SHA | Description |
+|---|---|---|
+| `origin/preview/vercel-review` (unchanged) | `de4b9915763080e03388032cf0f643734d8c4132` | `fix(discover): use locale route params in client page` |
+| Local HEAD at takeover | `9d23530` | `feat(test): set up vitest and implement component tests` |
+| Local HEAD after | `fbe86cd` | `feat(brand): integrate official RAVINE wordmark and self-hosted Avenir Arabic` |
+
+Two local commits were already ahead of `origin` when the session started
+(`c14fcca`, `9d23530`), plus uncommitted work. Nothing has been pushed.
+
+---
+
+## 3. Quality gates — before and after (actually executed)
+
+| Gate | Command | Before | After |
+|---|---|---|---|
+| Production build | `npm run build` | ✅ 39 routes, Next.js 16.4.5 (Turbopack) | ✅ 40 routes (+`/icon.png`) |
+| Lint | `npx eslint .` | ⚠️ 1 warning (`empty-state.tsx`: unused `locale`) | ✅ **0 problems** |
+| Tests | `npx vitest run` | ✅ 1 file / 2 tests passed | ✅ 1 file / 2 tests passed |
+
+---
+
+## 4. Defects found and fixed (with evidence)
+
+### FIXED — P1: public guest homepage returned HTTP 500 without Supabase env
+
+`src/app/[locale]/page.tsx` called `createClient()` unconditionally (line 68),
+which calls `requireSupabaseEnvironment()` and throws when the two public env
+vars are absent. Combined with `export const dynamic = "force-dynamic"`, the
+whole guest shell failed.
+
+Reproduced with a real build that excluded `.env.local`:
+
+```
+GET /ar            => 500   (before)
+GET /en            => 500   (before)
+```
+
+After guarding the call behind `getSupabaseEnvironment()` and catching auth
+failures, the same no-env build returns:
+
+```
+GET /ar            => 200 (21393 bytes)
+GET /en            => 200 (21933 bytes)
+GET /ar/discover   => 200
+GET /ar/about      => 200
+```
+
+This matches the charter rule that the public experience must not depend on a
+backend it does not need.
+
+### FIXED — P1: no real logo anywhere in the product
+
+There was no `public/` directory at all. Branding was text-only
+(`RAVINE.` / `RAVINE` + tagline) and `.rv-brand-mark` was a `Georgia` serif
+monogram placeholder — the exact substitution the charter forbids (§41).
+
+Fixed using the founder's own approved package (`اللوجو والفونت.zip`):
+English wordmark, Arabic wordmark, monogram, and full lockups, trimmed from the
+4000×4000 originals and optimised (15.8 KB wordmark, 61.9 KB lockup).
+
+Implementation detail: the logos are white-on-transparent, so they are rendered
+through CSS `mask` with `background-color: currentColor`. The mark therefore
+follows the brand text colour in both dark and light themes, and `[dir=rtl]`
+switches to the Arabic wordmark automatically — no JS, no duplicate markup.
+
+### FIXED — P2: typography depended on a third-party CDN
+
+`src/app/globals.css` line 1 was a render-blocking
+`@import url("https://fonts.googleapis.com/...")` for DM Sans + IBM Plex Sans
+Arabic. The founder's bilingual brand typeface **Avenir Arabic** sat unused in
+the transfer package.
+
+Verified with real glyph rendering (Pillow/FreeType) that `avenir-arabic-book.otf`
+covers Latin, Arabic, and digits — so it is a legitimate full replacement.
+
+Now self-hosted from `public/fonts/` (6 weights, `font-display: swap`), the
+external import is removed, and family references were migrated. Verified in the
+built CSS: `fonts.googleapis` occurrences = **0**, `Avenir Arabic` = 40.
+
+### FIXED — P3: lint warning
+
+`empty-state.tsx` declared `locale` but never used it. Now used for `lang`/`dir`
+on the root element, which also fixes bidi rendering of the empty state.
+
+---
+
+## 5. Files changed
+
+**Commit `b853049`** — preserved pre-existing WIP (not authored this session):
+`tsconfig.json`, `vitest.setup.ts`, `docs/ROADMAP.md`, `src/lib/privacy.ts`.
+
+**Commit `fbe86cd`** — this session's batch (35 files):
+`src/app/globals.css`; 19 `src/app/[locale]/**/page.tsx` files;
+`src/components/member-home.tsx`; `src/components/empty-state.tsx`;
+`public/brand/*` (6 images); `public/fonts/avenir-arabic-*.otf` (6 fonts);
+`src/app/icon.png`.
+
+---
+
+## 6. Claims I checked and did NOT confirm as defects
+
+Recorded so they are not repeated as facts:
+
+- **`src/app/layout.tsx` "mojibake"**: not real. Raw bytes are `\xe2\x80\x94`
+  (a valid UTF-8 em dash). What looked like `â€"` was console/display decoding.
+- **Arabic strings double-encoded**: not real. A byte-level scan of all 63
+  source files found **0** mojibake markers and 0 invalid-UTF-8 files.
+- **"Fonts are never loaded"**: wrong — they *were* loaded, via the Google
+  Fonts `@import`. The real issue was the third-party dependency, which is now
+  removed.
+
+---
+
+## 7. Remaining issues (not fixed in this batch)
+
+| Severity | Issue |
+|---|---|
+| **BLOCKER (product)** | Supabase has **no tables**. Every authenticated surface (profile, creator studio, library, team, review, reporting) will fail at runtime until migrations are applied — which requires founder approval and a management token. |
+| **BLOCKER (auth)** | Google OAuth is **disabled** in the Supabase project (`google: false`). The "Continue with Google" button cannot work end-to-end. |
+| HIGH | 13 authenticated routes still call `createClient()` unconditionally, so they return 500 (instead of redirecting to sign-in) if the backend is absent. Deliberately out of this batch's scope. |
+| MEDIUM | Hero, creator, and studio visuals hotlink `images.unsplash.com` in `globals.css` — third-party stock imagery, extra origin, no brand control. Needs a design decision. |
+| MEDIUM | `docs/ROADMAP.md` (in commit `b853049`) marks three Phase-3 items as `[x]`, including "Select media storage and processing architecture". **I found no storage integration, configuration, or credentials** to support that. Treat as unverified until evidence is supplied. |
+| LOW | `.rv-brand-mark` (Georgia monogram) and `.rv-logo span` colour rules are now dead CSS. |
+| LOW | `avenir-arabic-regular.otf` is not registered — it duplicates the `book` 400 weight. Kept on disk. |
+
+---
+
+## 8. LOCKED constraints respected
+
+- No deploy of any kind; no `git push` (it would auto-deploy).
+- No work on `main`, no changes to `she3b9620/Ravine` or `she3b9620/Ravine-Next`.
+- No Supabase project/database created, no migration executed, no SQL run.
+- No force push, no wide reset, no rollback, no merge.
+- No secret values printed; env files contain only the two public keys.
+- Brand colours and charter untouched.
+
+## 9. OPEN decisions left untouched
+
+Account tier names/criteria, verification conditions, creator acceptance rules,
+Creative Evidence, ratings/nominations, Absolute Cinema, revenue splits, prices,
+commissions, payout thresholds, currencies/providers, tax policy, RAVINE Fund,
+RAVINE Originals, Marketplace, MVP scope. None were decided or implied.
+
+## 10. External requirements (founder action)
+
+1. **Supabase management token** (`sbp_…`) to grant control-plane access:
+   provision the schema, enable Google OAuth, inspect logs. Without it, Supabase
+   remains read-only data-plane.
+2. **Deploy authorisation**, or explicit instruction to temporarily disconnect
+   the GitHub integration, before any push.
+3. Decision on whether `preview/vercel-review` should be the branch Vercel
+   builds automatically, given the founder's no-deploy rule.
+
+## 11. Recommended next step
+
+Apply the existing migrations to the Supabase project under explicit approval
+(or review them first, as files only), then enable Google OAuth and verify the
+signup → callback → session flow end to end. Until the database exists, no
+authenticated feature can be honestly called implemented.
