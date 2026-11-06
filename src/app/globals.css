@@ -466,3 +466,27 @@ html[data-theme="light"] .rv-discover-selection p{color:#554c43}
 .rv-work-card:hover{filter:none}
 .rv-creator-card:hover,.rv-community-card:hover{background:#151719}
 .rv-example-badge{position:absolute;top:10px;inset-inline-end:10px;z-index:2;padding:3px 9px;border:1px solid rgba(196,122,82,.55);border-radius:999px;background:rgba(9,9,9,.72);font-size:9px;letter-spacing:.12em;color:#d49a78;text-transform:uppercase;pointer-events:none}
+
+/* ── Accessibility: keyboard focus, reduced motion, light-theme contrast ── */
+
+/* Focus ring. No single brand colour reaches 3:1 on both the ink and cream
+   surfaces (sand 8.24 on ink but 2.00 on cream; brown 7.08 on cream but 2.34 on
+   ink), so the ring colour is themed. */
+:root{--rv-focus:#D49A78}
+html[data-theme="light"]{--rv-focus:#70402F}
+a:focus-visible,button:focus-visible,summary:focus-visible,[role="button"]:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--rv-focus);outline-offset:2px;border-radius:4px}
+.auth-form input:focus-visible,.creator-form input:focus-visible,.creator-form textarea:focus-visible,.creator-form select:focus-visible{outline:2px solid var(--rv-focus);outline-offset:1px;border-color:var(--rv-focus)}
+
+/* Respect reduced motion everywhere. The three earlier blocks only covered
+   .ravine-home, .rv-shell and the auth modal; discover, creator, profile,
+   works, creators, communities, settings and auth screens were uncovered. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+
+/* Light theme accent text. sand (#D49A78) reads 2.00:1 and copper (#C47A52)
+   2.79:1 on cream — both far below AA. The palette's own brown (#70402F)
+   reaches 7.08:1 on cream, 7.64:1 on the sidebar and 8.20:1 on cards.
+   Scoped to the surfaces that actually have light-theme rules, so pages that
+   stay dark (creator, works, creators, communities) are untouched. */
+html[data-theme="light"] :is(.rv-shell,.rv-discover-page) :is(.rv-kicker,.rv-eyebrow,.rv-category b,.rv-category>span,.rv-world-number,.rv-nav-glyph,.rv-block-heading>a,.rv-world-card>b,.rv-feature-copy>a,.rv-social-card>span,.rv-social-card>b,.rv-creator-emblem>span,.rv-side-bottom>a,.rv-side-language a,.rv-guest-mark,.rv-discover-next a){color:#70402F}
