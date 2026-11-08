@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
-import RAVINEOpenAuth from "@/components/open-auth-link";
+import CommunityMembershipButton from "@/components/community-membership-button";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +35,7 @@ export default async function CommunityDetailPage({
   let community: CommunityData | null = null;
   let memberCount = 0;
   let userLoggedIn = false;
+  let isMember = false;
 
   if (getSupabaseEnvironment()) {
     try {
@@ -59,6 +60,17 @@ export default async function CommunityDetailPage({
           .eq("status", "active");
 
         memberCount = count ?? 0;
+
+        if (userRes.user) {
+          const { data: myMem } = await supabase
+            .from("community_memberships")
+            .select("status")
+            .eq("community_id", communityId)
+            .eq("account_id", userRes.user.id)
+            .maybeSingle();
+
+          isMember = myMem?.status === "active";
+        }
       }
     } catch {
       community = null;
@@ -105,17 +117,12 @@ export default async function CommunityDetailPage({
         </div>
 
         <div className="community-actions">
-          {userLoggedIn ? (
-            <p className="community-member-note">
-              {ar ? "أنت مسجل الدخول، يمكنك متابعة نقاشات وفعاليات هذا المجتمع." : "You are signed in and can engage with discussions and events in this community."}
-            </p>
-          ) : (
-            <div className="community-guest-join">
-              <RAVINEOpenAuth className="action-button-accent">
-                {ar ? "تسجيل الدخول للانضمام والمشاركة ↗" : "Sign in to join and participate ↗"}
-              </RAVINEOpenAuth>
-            </div>
-          )}
+          <CommunityMembershipButton
+            communityId={community.id}
+            locale={locale}
+            isAuthenticated={userLoggedIn}
+            isMember={isMember}
+          />
         </div>
       </section>
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
+import CreatorFollowButton from "@/components/creator-follow-button";
 
 export const dynamic = "force-dynamic";
 
@@ -41,10 +42,15 @@ export default async function CreatorProfilePage({
   let creator: CreatorData | null = null;
   let works: WorkItem[] = [];
   let communities: CommunityItem[] = [];
+  let currentUserId: string | null = null;
+  let isFollowing = false;
 
   if (getSupabaseEnvironment()) {
     try {
       const supabase = await createClient();
+      const { data: userRes } = await supabase.auth.getUser();
+      currentUserId = userRes?.user?.id ?? null;
+
       const { data: creatorRes } = await supabase
         .from("creator_identities")
         .select("id,display_name,handle,biography,discipline_tags,status,created_at")
@@ -55,6 +61,16 @@ export default async function CreatorProfilePage({
       creator = creatorRes as CreatorData | null;
 
       if (creator) {
+        if (currentUserId) {
+          const { data: followRes } = await supabase
+            .from("follows")
+            .select("follower_account_id")
+            .eq("follower_account_id", currentUserId)
+            .eq("followed_creator_identity_id", creator.id)
+            .maybeSingle();
+          isFollowing = !!followRes;
+        }
+
         const { data: worksRes } = await supabase
           .from("works")
           .select("id,title,synopsis,kind,published_at")
@@ -94,6 +110,14 @@ export default async function CreatorProfilePage({
           <p className="eyebrow">RAVINE / CREATOR IDENTITY</p>
           <h1>{creator.display_name}</h1>
           {creator.handle && <p className="creator-handle-large">@{creator.handle}</p>}
+        </div>
+        <div className="creator-profile-actions">
+          <CreatorFollowButton
+            creatorId={creator.id}
+            locale={locale}
+            isAuthenticated={!!currentUserId}
+            isFollowing={isFollowing}
+          />
         </div>
       </section>
 

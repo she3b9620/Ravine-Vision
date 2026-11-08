@@ -640,3 +640,18 @@ html[data-theme="light"] :is(.rv-shell,.rv-discover-page) :is(.rv-kicker,.rv-eye
 .work-footer-charter{margin-top:60px;padding-top:28px;border-top:1px solid rgba(255,255,255,.1)}
 .work-report-action{margin-top:16px}
 
+/* Creator follow button */
+.creator-profile-actions{margin-inline-start:auto}
+.creator-follow-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:999px;background:rgba(196,122,82,.15);border:1px solid #c47a52;color:#f1e9dc;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s ease}
+.creator-follow-btn:hover{background:#c47a52;color:#100d0b}
+.creator-follow-btn.is-following{background:transparent;border-color:rgba(255,255,255,.25);color:#cfc6b8}
+.creator-follow-btn.is-following:hover{border-color:#e05b5b;color:#e05b5b}
+.follow-symbol{font-size:14px}
+
+/* Community membership active & leave bar */
+.community-membership-active-bar{display:flex;flex-wrap:wrap;align-items:center;gap:18px}
+.community-member-badge{display:inline-block;padding:8px 16px;background:rgba(24,63,70,.5);border:1px solid #183f46;border-radius:6px;color:#d4e5e0;font-size:13px;font-weight:500}
+.community-leave-button{background:transparent;border:0;color:#8f918d;font-size:12px;text-decoration:underline;cursor:pointer;padding:6px 10px;transition:color .2s}
+.community-leave-button:hover{color:#e05b5b}
+
+
