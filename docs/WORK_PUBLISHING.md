@@ -66,3 +66,41 @@ repository and was applied to the isolated `ravine-vision` Supabase project
 (`pkgtxlmfzsvjarfdhhov`) on 2026-11-06 with explicit founder authorization, together
 with the earlier foundation migrations. It must never be applied to the legacy RAVINE
 projects.
+
+`supabase/migrations/20261106000200_restore_creator_application_self_submission.sql`
+was applied on 2026-11-08 to restore the column-scoped insert grant on
+`creator_applications`. An earlier hardening migration had revoked insert together
+with update/delete, which blocked the intended RLS-guarded self-submission path. The
+restored grant stays column-scoped and insert-only; update and delete remain revoked.
+
+## QA verification data
+
+The 2026-11-08 end-to-end verification used labeled test accounts and left their
+data on the preview environment so the cycle can be inspected:
+
+- creator: `ravine-qa@ravine-vision.test` (label `(بيانات اختبار QA)`)
+- staff reviewer: `ravine-qa-staff@ravine-vision.test` (role `reviewer`)
+- one published work: `d30667e1-73eb-4af6-81cc-62acbc16df7f`
+
+To remove the QA data later, sign in as staff through the app first (staff RPCs
+require an authenticated session), then run this in the dashboard SQL editor:
+
+```sql
+delete from public.audit_events
+where subject_id in (
+  select id from public.works where created_by = 'ead4e980-7410-47e9-8c97-41c9a0899489'
+);
+delete from public.works where created_by = 'ead4e980-7410-47e9-8c97-41c9a0899489';
+delete from public.creator_applications
+where applicant_account_id = 'ead4e980-7410-47e9-8c97-41c9a0899489';
+delete from public.creator_identities
+where owner_account_id = 'ead4e980-7410-47e9-8c97-41c9a0899489';
+delete from app_private.staff_roles where account_id = 'a74cafd0-db46-44c5-a335-8d23ca688e27';
+delete from public.profiles
+where id in ('ead4e980-7410-47e9-8c97-41c9a0899489', 'a74cafd0-db46-44c5-a335-8d23ca688e27');
+```
+
+The matching `auth.users` rows must be removed through the Supabase Authentication
+dashboard (or the Admin API) before those profile rows; delete them in that order.
+QA data is intentionally kept for now and is clearly labeled, not passed off as real
+content.

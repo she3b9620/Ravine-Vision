@@ -60,3 +60,24 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   Upgraded Creators and Communities public discovery from static placeholders to real database queries
   with honest empty states and full detail routes (`/creators/[creatorId]` and `/communities/[communityId]`).
   All 41 vitest tests pass. Next.js production build succeeds for all 40 routes with 0 errors.
+- **2026-11-08** — End-to-end publish cycle **VERIFIED** on the preview deployment
+  `https://ravine-vision-y16m3k1x4-she3b9620.vercel.app` (branch `preview/vercel-review`).
+  With clearly labeled QA accounts, the full path ran as real authenticated sessions:
+  account → profile → creator identity/application → staff approval → studio draft →
+  creator chooses `public` visibility in the draft editor → submit for review →
+  staff `changes_requested` with notes visible to the creator → resubmit → staff
+  publishes → guest `/ar/works` and `/en/works` list the work and the detail page
+  renders. Pre-publish guest checks confirmed an empty listing and a 404 for the
+  direct work URL, without leaking unpublished content. Database verification:
+  `status = 'published'`, `visibility = 'public'`, `published_at` and `reviewed_at`
+  set, review notes stored, and audit events for the submission plus both review
+  decisions. Two defects found by this verification were fixed and shipped:
+  migration `20261106000200_restore_creator_application_self_submission.sql`
+  restores the column-scoped insert grant on `creator_applications` that an earlier
+  hardening migration had over-revoked, and the draft editor now exposes the
+  visibility choice while publishing remains a staff decision. The QA data stays on
+  the preview and is explicitly labeled as test data; a cleanup query is documented
+  in [Work Publishing Workflow](WORK_PUBLISHING.md). Remaining gaps: Google OAuth
+  end-to-end sign-in is blocked on external provider configuration, and media
+  upload remains an OPEN provider decision. No production deployment and no changes
+  to `main` or the legacy repositories.
