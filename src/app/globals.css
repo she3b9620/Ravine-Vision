@@ -588,3 +588,55 @@ html[data-theme="light"] :is(.rv-shell,.rv-discover-page) :is(.rv-kicker,.rv-eye
 .community-meta-bar{display:flex;gap:20px;font-size:12px;color:#8f918d;margin:24px 0}
 .community-actions{margin:32px 0}
 .community-member-note{font-size:13px;color:#d49a78}
+
+/* ── Work Detail, Theatrical Stage, Reactions & Discussion ── */
+.work-theatrical-stage{margin:20px 0 40px}
+.work-stage-screen{width:100%;aspect-ratio:16/9;max-height:480px;background:#060809;border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;position:relative;margin:28px 0;display:grid;place-items:center}
+.stage-screen-backdrop{text-align:center;padding:24px}
+.stage-symbol{font-size:36px;color:#c47a52;display:block;margin-bottom:12px}
+.stage-kind-title{font-size:18px;color:#f1e9dc;margin:0 0 6px}
+.stage-kind-subtitle{font:11px "Avenir Arabic",system-ui,sans-serif;letter-spacing:.2em;color:#d49a78;margin:0}
+.work-creator-bar{display:flex;align-items:center;margin:18px 0 28px}
+.work-creator-link{display:flex;align-items:center;gap:12px;text-decoration:none;transition:opacity .2s}
+.work-creator-link:hover{opacity:.85}
+.work-creator-avatar{width:42px;height:42px;border-radius:50%;background:#c47a52;color:#100d0b;font-weight:700;display:grid;place-items:center;font-size:17px}
+.work-creator-info{display:flex;flex-direction:column}
+.work-creator-name{font-size:15px;font-weight:600;color:#f1e9dc}
+.work-creator-handle{font-size:12px;color:#8f918d}
+.work-synopsis-box{font-size:16px;line-height:2;color:#cfc6b8;max-width:760px;margin:24px 0}
+
+/* Reactions */
+.work-reactions-wrapper{margin:40px 0;padding:28px;background:rgba(21,23,25,.65);border:1px solid rgba(255,255,255,.1);border-radius:12px;max-width:760px}
+.work-reactions-note{font-size:13px;line-height:1.7;color:#a89e90;margin:0 0 18px}
+.work-reactions-buttons{display:flex;flex-wrap:wrap;gap:14px}
+.work-reaction-btn{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:999px;color:#cfc6b8;cursor:pointer;font-size:13px;transition:all .2s ease}
+.work-reaction-btn:hover{background:rgba(255,255,255,.1);border-color:#c47a5270}
+.work-reaction-btn.is-active{background:rgba(196,122,82,.18);border-color:#c47a52;color:#f1e9dc}
+.reaction-symbol{color:#c47a52;font-size:15px}
+.reaction-label{font-weight:500}
+.reaction-count{padding:1px 7px;background:rgba(255,255,255,.12);border-radius:999px;font-size:11px}
+.work-reaction-btn.is-active .reaction-count{background:#c47a52;color:#100d0b;font-weight:700}
+
+/* Discussion */
+.work-discussion-section{margin:50px 0;max-width:760px;border-top:1px solid rgba(255,255,255,.1);padding-top:36px}
+.discussion-header h2{font-size:22px;margin:0 0 10px;color:#f1e9dc}
+.discussion-charter-note{font-size:13px;line-height:1.8;color:#8f918d;margin:0 0 24px}
+.work-comment-form{display:grid;gap:14px;margin-bottom:34px}
+.work-comment-form textarea{width:100%;background:#0d1012;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:14px;color:#f1e9dc;font:inherit;font-size:14px;line-height:1.7;outline:none;resize:vertical}
+.work-comment-form textarea:focus{border-color:#c47a52}
+.comment-form-actions{display:flex;justify-content:flex-end}
+.discussion-guest-prompt{padding:20px;background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.18);border-radius:8px;margin-bottom:30px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.discussion-guest-prompt p{margin:0;font-size:13px;color:#cfc6b8}
+.comments-list{display:grid;gap:18px}
+.empty-comments-state{padding:32px 16px;text-align:center;color:#8f918d;font-size:13px;background:rgba(255,255,255,.02);border-radius:8px}
+.comment-card{padding:18px;background:rgba(21,23,25,.5);border:1px solid rgba(255,255,255,.08);border-radius:8px}
+.comment-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.comment-author-avatar{width:32px;height:32px;border-radius:50%;background:#183f46;color:#f1e9dc;display:grid;place-items:center;font-size:13px;font-weight:700}
+.comment-author-meta{display:flex;align-items:center;gap:8px;font-size:12px;flex-wrap:wrap}
+.comment-author-name{font-weight:600;color:#f1e9dc}
+.comment-author-handle{color:#8f918d}
+.comment-date{color:#737777}
+.comment-body p{margin:0;font-size:14px;line-height:1.8;color:#ded8cd}
+.work-footer-charter{margin-top:60px;padding-top:28px;border-top:1px solid rgba(255,255,255,.1)}
+.work-report-action{margin-top:16px}
+
