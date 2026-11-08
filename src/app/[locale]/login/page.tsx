@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { signInAction, signUpAction } from "../auth/actions";
+import { signInAction, signUpAction, signInWithGoogleAction } from "../auth/actions";
+import { getAuthProviders } from "@/lib/auth-providers";
 
 type Props = { params: Promise<{ locale: string }>; searchParams: Promise<{ error?: string; check_email?: string }> };
 
@@ -9,6 +10,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
   const query = await searchParams;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
+  const { google: googleEnabled } = await getAuthProviders();
   const errors: Record<string, string> = ar
     ? { missing: "أدخل البريد الإلكتروني وكلمة المرور.", credentials: "بيانات الدخول غير صحيحة.", invalid: "راجع الاسم والبريد، واجعل كلمة المرور 10 أحرف على الأقل.", signup: "تعذر إنشاء الحساب. قد يكون البريد مستخدمًا بالفعل.", callback: "تعذر تأكيد الحساب. حاول تسجيل الدخول.", backend: "خدمة الحسابات غير مهيّأة في هذه البيئة بعد. تصفح رَافِين متاح كزائر." }
     : { missing: "Enter your email and password.", credentials: "The email or password is incorrect.", invalid: "Check your name and email; password must be at least 10 characters.", signup: "Account creation failed. This email may already be registered.", callback: "Account confirmation failed. Try signing in.", backend: "The account service is not configured in this environment yet. You can still browse RAVINE as a guest." };
@@ -21,6 +23,17 @@ export default async function LoginPage({ params, searchParams }: Props) {
           <h2>{ar ? "تسجيل الدخول" : "Sign in"}</h2>
           {query.error && <p className="auth-message" role="alert">{errors[query.error] ?? (ar ? "حدث خطأ. حاول مرة أخرى." : "Something went wrong. Try again.")}</p>}
           {query.check_email && <p className="auth-success">{ar ? "تم إرسال رسالة تأكيد إلى بريدك الإلكتروني. افتحها لإكمال إنشاء الحساب." : "A confirmation email has been sent. Open it to finish creating your account."}</p>}
+          {googleEnabled && (
+            <>
+              <form action={signInWithGoogleAction}>
+                <input type="hidden" name="locale" value={locale}/>
+                <button className="rv-google-button" type="submit" style={{ width: "100%", justifyContent: "center", marginBottom: "18px" }}>
+                  <span>G</span>{ar ? "المتابعة باستخدام Google" : "Continue with Google"}
+                </button>
+              </form>
+              <div className="auth-divider"><span>{ar ? "أو بالبريد الإلكتروني" : "Or with email"}</span></div>
+            </>
+          )}
           <form action={signInAction} className="auth-form">
             <input type="hidden" name="locale" value={locale}/>
             <label>{ar ? "البريد الإلكتروني" : "Email"}<input name="email" type="email" autoComplete="email" required/></label>
