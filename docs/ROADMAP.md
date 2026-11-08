@@ -33,7 +33,9 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [x] Discovery and viewing (Guest hero showcase with Video/Image mode, public works, creators, and communities discovery linked to real database tables).
 - [x] Personal account and multiple creator identities.
 - [x] Creator workspace and publishing lifecycle.
-- [ ] Communities, live/audio, and collaboration in staged releases.
+- [x] Communities, live/audio, and collaboration in staged releases (Community creation, detail view, active membership join/leave, creator teams, and invitation lifecycle).
+- [x] Work detail theatrical presentation, charter-driven reactions (appreciate/thoughtful/inspiring), and dignified discourse reflections.
+- [x] Creator profile following connection and community linkage.
 
 ## Phase 5 — Trust, economy, and scale
 - [ ] Rights claims, licensing, disputes, and appeals.
@@ -81,3 +83,5 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   end-to-end sign-in is blocked on external provider configuration, and media
   upload remains an OPEN provider decision. No production deployment and no changes
   to `main` or the legacy repositories.
+
+- **2026-11-08 (OAuth & Interaction Expansion)** — Google OAuth verified active (google: true) on Supabase with multi-client architecture prepared for Web, Desktop, and Android. Built theatrical stage presentation for works, charter-driven reactions (appreciate, thoughtful, inspiring), and dignified reflections thread. Added community membership join/leave actions and creator work follow flow. All 41 Vitest tests pass; Next.js production build passes across all 40 routes with 0 errors.
