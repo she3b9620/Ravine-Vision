@@ -23,6 +23,9 @@ draft --(creator submits)--> in_review --(staff publishes)--> published
   and resubmitted. Reviewer notes are shown to the owning creator.
 - Publishing records `published_at`; public discovery still requires
   `visibility = 'public'`.
+- The creator chooses `visibility` (public / unlisted / private) in the draft editor.
+  Choosing `public` does not publish anything by itself; the work stays a private
+  draft until a staff decision publishes it.
 - Every submission and decision writes an `audit_events` record.
 
 ## Authorization boundaries
@@ -39,6 +42,8 @@ draft --(creator submits)--> in_review --(staff publishes)--> published
 
 - `/creator/library` shows review status, reviewer notes, and a submit action for
   eligible drafts.
+- `/creator/library/[workId]/edit` lets the owning creator edit draft metadata and
+  choose the visibility that will apply after publication approval.
 - `/review` includes a works queue for authorized reviewers.
 - `/works` lists publicly published works.
 - `/works/[workId]` shows one publicly published work and its declared creative

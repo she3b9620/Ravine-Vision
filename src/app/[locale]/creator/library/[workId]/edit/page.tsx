@@ -9,7 +9,7 @@ export default async function EditWorkPage({params}:Props){
  const {locale,workId}=await params;
  if(locale!=="ar"&&locale!=="en") notFound();
  const ar=locale==="ar"; const { supabase, user } = await requireUser(locale);
- const {data:work}=await supabase.from("works").select("id,creator_identity_id,title,synopsis,kind,language_code").eq("id",workId).eq("created_by",user.id).eq("status","draft").maybeSingle();
+ const {data:work}=await supabase.from("works").select("id,creator_identity_id,title,synopsis,kind,language_code,visibility").eq("id",workId).eq("created_by",user.id).eq("status","draft").maybeSingle();
  if(!work) notFound();
  const {data:identity}=await supabase.from("creator_identities").select("display_name,handle").eq("id",work.creator_identity_id).eq("owner_account_id",user.id).maybeSingle();
  if(!identity) notFound();
@@ -22,5 +22,7 @@ export default async function EditWorkPage({params}:Props){
  <label>{ar?"نبذة مختصرة":"Short synopsis"}<textarea name="synopsis" maxLength={3000} rows={5} defaultValue={work.synopsis??""}/></label>
  <label>{ar?"نوع العمل":"Work type"}<select name="kind" defaultValue={work.kind}>{kinds.map(k=><option key={k} value={k}>{k.replaceAll("_"," ")}</option>)}</select></label>
  <label>{ar?"لغة العمل":"Work language"}<select name="language_code" defaultValue={work.language_code}><option value="ar">العربية</option><option value="en">English</option><option value="und">{ar?"غير محددة":"Unspecified"}</option></select></label>
+ <label>{ar?"الظهور بعد النشر":"Visibility after publishing"}<select name="visibility" defaultValue={work.visibility}><option value="public">{ar?"عام — يظهر للجمهور بعد اعتماد النشر":"Public — visible after publication approval"}</option><option value="unlisted">{ar?"غير مدرج — بالرابط فقط":"Unlisted — link only"}</option><option value="private">{ar?"خاص — لا يظهر علنًا":"Private — never public"}</option></select></label>
+ <p className="creator-muted">{ar?"اختيار «عام» لا ينشر العمل بنفسه؛ النشر يتم فقط بعد مراجعة الفريق واعتماده. العمل يبقى مسودةً خاصة حتى ذلك الحين.":"Choosing “Public” does not publish the work by itself; publishing happens only after team review approval. The work stays a private draft until then."}</p>
  <button className="creator-submit" type="submit">{ar?"حفظ التعديلات":"Save changes"} ↗</button></form></section></main>;
 }
