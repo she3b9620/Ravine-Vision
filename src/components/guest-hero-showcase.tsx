@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import RAVINEOpenAuth from "@/components/open-auth-link";
 
@@ -8,32 +8,40 @@ type Props = {
   locale: string;
 };
 
+function subscribeToReducedMotion(onChange: () => void) {
+  const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+function getReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function getServerReducedMotion() {
+  return false;
+}
+
 export default function GuestHeroShowcase({ locale }: Props) {
   const ar = locale === "ar";
   const [mode, setMode] = useState<"video" | "image">("video");
-  const [isPlaying, setIsPlaying] = useState(true);
+  const reducedMotion = useSyncExternalStore(subscribeToReducedMotion, getReducedMotion, getServerReducedMotion);
+  const [playOverride, setPlayOverride] = useState<boolean | null>(null);
+  const isPlaying = playOverride ?? !reducedMotion;
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    // Respect reduced motion preference
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mediaQuery.matches) {
-      setIsPlaying(false);
-      if (videoRef.current) {
-        videoRef.current.pause();
-      }
+    const video = videoRef.current;
+    if (!video) return;
+    if (isPlaying) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
     }
-  }, []);
+  }, [isPlaying]);
 
   function togglePlay() {
-    if (!videoRef.current) return;
-    if (isPlaying) {
-      videoRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      videoRef.current.play().catch(() => {});
-      setIsPlaying(true);
-    }
+    setPlayOverride(!isPlaying);
   }
 
   return (
