@@ -3,6 +3,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import CommunityMembershipButton from "@/components/community-membership-button";
+import {
+  approveMembershipAction,
+  rejectMembershipAction,
+} from "./actions";
+import { VISIBILITY_LABELS, type EntryQuestion } from "@/lib/community";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +18,7 @@ type CommunityData = {
   description: string | null;
   guidelines: string | null;
   visibility: string;
+  entry_questions: EntryQuestion[] | null;
   created_at: string;
   creator_identities: CreatorRef | CreatorRef[] | null;
 };
@@ -21,6 +27,12 @@ function creatorOf(community: CommunityData) {
   const creator = community.creator_identities;
   if (!creator) return null;
   return Array.isArray(creator) ? creator[0] ?? null : creator;
+}
+
+function visibilityLabel(visibility: string | null, ar: boolean) {
+  const key = (visibility ?? "public") as keyof typeof VISIBILITY_LABELS;
+  const label = VISIBILITY_LABELS[key] ?? VISIBILITY_LABELS.public;
+  return ar ? label.ar : label.en;
 }
 
 export default async function CommunityDetailPage({
@@ -39,6 +51,8 @@ export default async function CommunityDetailPage({
   let memberCount = 0;
   let userLoggedIn = false;
   let membershipStatus: string | null = null;
+  let isOwner = false;
+  let pendingRequests: { accountId: string; status: string; createdAt: string | null }[] = [];
 
   if (getSupabaseEnvironment()) {
     try {
@@ -48,9 +62,8 @@ export default async function CommunityDetailPage({
 
       const { data: comRes } = await supabase
         .from("communities")
-        .select("id,name,description,guidelines,visibility,created_at,creator_identities(id,display_name,handle)")
+        .select("id,name,description,guidelines,visibility,entry_questions,created_at,creator_identities(id,display_name,handle)")
         .eq("id", communityId)
-        .eq("visibility", "public")
         .maybeSingle();
 
       community = comRes as CommunityData | null;
@@ -73,6 +86,34 @@ export default async function CommunityDetailPage({
             .maybeSingle();
 
           membershipStatus = myMem?.status ?? null;
+
+          // Owner check via creator identity
+          const creator = creatorOf(community);
+          if (creator && creator.id) {
+            const { data: identity } = await supabase
+              .from("creator_identities")
+              .select("owner_account_id")
+              .eq("id", creator.id)
+              .maybeSingle();
+            isOwner = identity?.owner_account_id === userRes.user.id;
+          }
+
+          // Pending membership requests for owner approval
+          if (isOwner) {
+            const { data: pending } = await supabase
+              .from("community_memberships")
+              .select("account_id, status, created_at")
+              .eq("community_id", communityId)
+              .eq("status", "requested");
+
+            if (pending) {
+              pendingRequests = pending.map((p) => ({
+                accountId: p.account_id,
+                status: p.status,
+                createdAt: p.created_at,
+              }));
+            }
+          }
         }
       }
     } catch {
@@ -82,6 +123,7 @@ export default async function CommunityDetailPage({
 
   if (!community) notFound();
   const creator = creatorOf(community);
+  const hasEntryQuestions = Array.isArray(community.entry_questions) && community.entry_questions.length > 0;
 
   return (
     <main className="simple-page community-detail-page" dir={ar ? "rtl" : "ltr"}>
@@ -100,6 +142,15 @@ export default async function CommunityDetailPage({
             </Link>
           </p>
         )}
+        <div className="community-meta-bar">
+          <span>{ar ? `الأعضاء: ${memberCount}` : `Members: ${memberCount}`}</span>
+          <span className="privacy-badge">{visibilityLabel(community.visibility, ar)}</span>
+          {hasEntryQuestions && (
+            <span className="entry-badge">
+              {ar ? "اختبار دخول مطلوب" : "Entry quiz required"}
+            </span>
+          )}
+        </div>
       </section>
 
       <section className="community-body">
@@ -114,16 +165,25 @@ export default async function CommunityDetailPage({
           </div>
         )}
 
-        <div className="community-meta-bar">
-          <span>{ar ? `الأعضاء: ${memberCount}` : `Members: ${memberCount}`}</span>
-          <span>{ar ? "مستوى الخصوصية: عام" : "Privacy: Public"}</span>
-        </div>
+        {hasEntryQuestions && community.entry_questions && (
+          <div className="community-entry-note">
+            <h3>{ar ? "اختبار الدخول" : "Entry Quiz"}</h3>
+            <p>
+              {ar
+                ? "هذا مجتمع عام، ولكن يُطلب اجتياز اختبار قصير قبل إرسال طلب الانضمام، للتأكد من فهم طبيعة المجتمع وقواعده."
+                : "This is a public community, but a short quiz is required before sending a join request, to ensure understanding of the community and its rules."}
+            </p>
+            <ul>
+              {community.entry_questions.map((q) => (
+                <li key={q.id}>{q.question}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {query.error === "membership" && (
           <p className="community-request-note" role="alert">
-            {ar
-              ? "تعذر تحديث عضوية المجتمع. حاول مرة أخرى."
-              : "Could not update community membership. Try again."}
+            {ar ? "تعذر تحديث عضوية المجتمع. حاول مرة أخرى." : "Could not update community membership. Try again."}
           </p>
         )}
 
@@ -133,12 +193,56 @@ export default async function CommunityDetailPage({
             locale={locale}
             isAuthenticated={userLoggedIn}
             membershipStatus={membershipStatus}
+            hasEntryQuestions={hasEntryQuestions}
           />
         </div>
+
+        {isOwner && pendingRequests.length > 0 && (
+          <section className="community-owner-approvals">
+            <h3>{ar ? "طلبات الانضمام قيد الموافقة" : "Pending Membership Requests"}</h3>
+            <p>
+              {ar
+                ? "اطلب من العضو الإجابة على أسئلة الدخول أولاً، ثم aprov أو رفض الطلب."
+                : "Ask the member to complete the entry quiz first, then approve or reject the request."}
+            </p>
+            <ul className="pending-requests-list">
+              {pendingRequests.map((req) => (
+                <li key={req.accountId} className="pending-request-item">
+                  <span>{req.accountId}</span>
+                  <div className="pending-request-actions">
+                    <form action={approveMembershipAction} style={{ display: "inline" }}>
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="community_id" value={communityId} />
+                      <input type="hidden" name="account_id" value={req.accountId} />
+                      <button
+                        type="submit"
+                        className="approve-button"
+                      >
+                        {ar ? "قبول" : "Approve"}
+                      </button>
+                    </form>
+                    <form action={rejectMembershipAction} style={{ display: "inline" }}>
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="community_id" value={communityId} />
+                      <input type="hidden" name="account_id" value={req.accountId} />
+                      <button
+                        type="submit"
+                        className="reject-button"
+                      >
+                        {ar ? "رفض" : "Reject"}
+                      </button>
+                    </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <p className="community-request-note">
           {ar
-            ? "الانضمام يُسجَّل كطلب. لا يمنح النظام العضوية النشطة تلقائيًا؛ مسار موافقة المالك لم يُعتمد بعد."
-            : "Membership is recorded as a request. The system does not self-activate members; owner approval is not approved yet."}
+            ? "الانضمام يُسجَّل كطلب. صاحب المجتمع له الحق في قبول أو رفض الطلبات. لا يمنح النظام العضوية النشطة تلقائيًا."
+            : "Membership is recorded as a request. The community owner has the right to approve or reject requests. The system does not self-activate members."}
         </p>
       </section>
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
+import { VISIBILITY_LABELS } from "@/lib/community";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,8 @@ type CommunityRow = {
   name: string;
   description: string | null;
   guidelines: string | null;
+  visibility: string;
+  entry_questions: unknown;
   created_at: string;
   creator_identities: CreatorRef | CreatorRef[] | null;
 };
@@ -19,6 +22,12 @@ function creatorOf(community: CommunityRow) {
   const creator = community.creator_identities;
   if (!creator) return null;
   return Array.isArray(creator) ? creator[0] ?? null : creator;
+}
+
+function visibilityLabel(visibility: string | null, ar: boolean) {
+  const key = (visibility ?? "public") as keyof typeof VISIBILITY_LABELS;
+  const label = VISIBILITY_LABELS[key] ?? VISIBILITY_LABELS.public;
+  return ar ? label.ar : label.en;
 }
 
 export default async function CommunitiesPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -32,7 +41,9 @@ export default async function CommunitiesPage({ params }: { params: Promise<{ lo
       const supabase = await createClient();
       const { data } = await supabase
         .from("communities")
-        .select("id,name,description,guidelines,created_at,creator_identities(display_name,handle)")
+        .select(
+          "id,name,description,guidelines,visibility,entry_questions,created_at,creator_identities(display_name,handle)"
+        )
         .eq("visibility", "public")
         .order("created_at", { ascending: false })
         .limit(60);
@@ -57,9 +68,15 @@ export default async function CommunitiesPage({ params }: { params: Promise<{ lo
         <div className="domain-grid communities-grid">
           {communities.map((com) => {
             const creator = creatorOf(com);
+            const hasEntryQuestions = Array.isArray(com.entry_questions) && com.entry_questions.length > 0;
             return (
               <Link className="domain-card public-community-card" key={com.id} href={`/${locale}/communities/${com.id}`}>
-                <span className="community-badge">{ar ? "مجتمع عام" : "PUBLIC"}</span>
+                <span className="community-badge">{visibilityLabel(com.visibility, ar)}</span>
+                {hasEntryQuestions && (
+                  <span className="community-badge entry-badge">
+                    {ar ? "اختبار دخول" : "Entry quiz"}
+                  </span>
+                )}
                 <h2>{com.name}</h2>
                 <p>{com.description || (ar ? "مجتمع فكري وإبداعي في رافين." : "A creative and cultural community on RAVINE.")}</p>
                 {creator && (

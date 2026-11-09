@@ -12,6 +12,8 @@ type Props = {
   locale: string;
   isAuthenticated: boolean;
   membershipStatus: string | null;
+  hasEntryQuestions?: boolean;
+  isOwner?: boolean;
 };
 
 export default function CommunityMembershipButton({
@@ -19,6 +21,7 @@ export default function CommunityMembershipButton({
   locale,
   isAuthenticated,
   membershipStatus,
+  hasEntryQuestions = false,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const ar = locale === "ar";
@@ -99,23 +102,40 @@ export default function CommunityMembershipButton({
     );
   }
 
+  // Not a member yet: show join button (with entry quiz if required)
   return (
     <form action={handleJoin}>
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="community_id" value={communityId} />
-      <button
-        type="submit"
-        className="action-button-accent"
-        disabled={isPending}
-      >
-        {isPending
-          ? ar
-            ? "جارٍ إرسال الطلب..."
-            : "Sending request..."
-          : ar
-          ? "طلب الانضمام إلى المجتمع ↗"
-          : "Request to join ↗"}
-      </button>
+      {hasEntryQuestions ? (
+        <button
+          type="submit"
+          className="action-button-accent"
+          disabled={isPending}
+        >
+          {isPending
+            ? ar
+              ? "جارٍ إرسال الطلب..."
+              : "Sending request..."
+            : ar
+            ? "بدء اختبار الدخول ↗"
+            : "Start entry quiz ↗"}
+        </button>
+      ) : (
+        <button
+          type="submit"
+          className="action-button-accent"
+          disabled={isPending}
+        >
+          {isPending
+            ? ar
+              ? "جارٍ إرسال الطلب..."
+              : "Sending request..."
+            : ar
+            ? "طلب الانضمام إلى المجتمع ↗"
+            : "Request to join ↗"}
+        </button>
+      )}
     </form>
   );
 }

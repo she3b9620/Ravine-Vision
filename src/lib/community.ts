@@ -1,6 +1,14 @@
-export type CommunityVisibility = "public" | "discoverable-private" | "invite-only";
+export type CommunityVisibility = "public" | "discoverable_private" | "invite_only";
 
 export type CommunityRole = "owner" | "moderator" | "member";
+
+export type EntryQuestion = {
+  id: string;
+  question: string;
+  type: "text" | "choice";
+  options?: string[];
+  correct_answer?: string | string[];
+};
 
 export type Community = {
   id: string;
@@ -8,7 +16,8 @@ export type Community = {
   name: string;
   description?: string;
   visibility: CommunityVisibility;
-  guidelinesVersion?: string;
+  guidelines?: string;
+  entry_questions?: EntryQuestion[];
   createdAt: string;
 };
 
@@ -18,4 +27,10 @@ export type CommunityMembership = {
   role: CommunityRole;
   status: "invited" | "requested" | "active" | "muted" | "suspended" | "left";
   joinedAt?: string;
+};
+
+export const VISIBILITY_LABELS: Record<CommunityVisibility, { ar: string; en: string }> = {
+  public: { ar: "عام", en: "Public" },
+  discoverable_private: { ar: "خاص يمكن اكتشافه", en: "Discoverable Private" },
+  invite_only: { ar: "دعوة فقط", en: "Invite Only" },
 };
