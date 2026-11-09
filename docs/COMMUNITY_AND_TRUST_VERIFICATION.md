@@ -1,8 +1,11 @@
 # Community and Trust Flows — Preview Verification
 
 **Date:** 2026-11-08 (continued into 2026-11-09)
-**Environment:** isolated `ravine-vision` Vercel preview `https://ravine-vision-8v0fruxcs-she3b9620.vercel.app`
-(branch `preview/vercel-review`, code commit `11bf328`)
+**Environment:** isolated `ravine-vision` Vercel preview
+`https://ravine-vision-3i7cxf58w-she3b9620.vercel.app` (branch
+`preview/vercel-review`; built from commit `043d9c0` plus the community-request
+and media-link fixes recorded here). The earlier checks ran on
+`https://ravine-vision-8v0fruxcs-she3b9620.vercel.app`.
 **Database:** isolated Supabase project `pkgtxlmfzsvjarfdhhov` only
 **Status:** preview verification with clearly labeled QA data. No production
 promotion, no `main` changes, and no legacy project changes.
@@ -28,7 +31,16 @@ remains unapproved. It does not convert any OPEN product decision into a policy.
   the UI silently showed empty lists.
 - **Membership stays request-only.** Insert is limited to
   `status = 'requested'`, `role = 'member'`, and the caller's own account. Accounts
-  may only leave. Owner approval of requests remains an OPEN workflow.
+  may withdraw a pending request and may request again after leaving, but can never
+  set `active`, `muted`, or `suspended` themselves. Migration
+  `20261109000100_allow_community_membership_rerequest.sql` narrows the self-update
+  policy to `requested`/`left` and leaves owner approval as an OPEN workflow.
+- **Metadata-only media attachment.** The merged media UI links an asset to a draft
+  work with a display role (`primary`, `poster`, `trailer`, …). Those assets are
+  still in the `initiated` state because no upload provider exists. Migration
+  `20261109000200_allow_pending_media_metadata_links.sql` allows owners to link
+  their own pending asset to their own draft without granting upload, playback,
+  publication, or provider access.
 - **Draft-only rights intake.** The declaration form appears only for drafts. A
   published work explains that changing declarations and the claims/disputes path
   are not approved yet.
@@ -47,11 +59,17 @@ All actions below ran through the deployed app with real authenticated sessions.
 | Creator requests tier `creator` | Request `f498b36c-c01b-47c9-8e73-455727ac4d6d` submitted |
 | Staff reviewer approves the tier request | Profile tier becomes `creator`; approved request and review notes visible |
 | Creator opens `/creator/community` with an active identity | Community `f4ddf242-4ea1-4c74-8e75-c399e342585f` created and listed |
-| Guest opens `/ar/communities` and the community detail page | Public community appears with organizer, charter, and privacy label |
+| Guest opens `/ar/communities` and the community detail page | Public community appears with organizer, charter, and privacy label; guest sees a sign-in-to-request CTA, not a direct join button |
+| Signed-in member requests to join the community | Row stored as `requested`; UI shows pending status and a withdraw action |
+| Member withdraws the request | Row becomes `left`; the request button returns |
+| Member requests again after leaving | Row returns to `requested`; no self-activation occurs |
+| Staff membership row created during the join test | Deleted; community membership table returned to zero rows |
 | Duplicate QA community from a retry | Duplicate `e793998a-e9b6-4654-8132-c2beb3487f8c` deleted |
 | Creator creates a draft | Draft `1ae57f04-ac53-47d1-8d5b-4b46d73e9d8e`, private |
 | Guest opens the draft URL directly | 404; no draft content leaked |
 | Creator registers media metadata | `video/mp4`, 10,485,760 bytes, state `initiated`; no upload occurs |
+| Creator links an `initiated` asset as `primary` | Failed with `?error=link` before the policy fix; succeeds after migration `20261109000200` |
+| Creator detaches the media link | `work_media` row removed; asset remains; both test assets and the test link were cleaned up |
 | Creator submits a rights declaration on the draft | Accepted declaration `f11f694b-59aa-49d9-8267-73cb14c0d5a0` |
 | Duplicate declaration from a retry | Rejected with notes `ffe9308c-6e06-44cf-9e73-2f5bbc22e0eb` |
 | Creator opens the published QA work's rights page | No form; page explains the published-work claims path is unapproved |
@@ -62,12 +80,14 @@ All actions below ran through the deployed app with real authenticated sessions.
 | `reviewer` opens `/review` | Review queues visible; safety/moderation section absent |
 | Staff role temporarily raised to `admin` | Both QA reports dismissed with notes; audit events recorded |
 | Staff role reverted to `reviewer` | Verified in `app_private.staff_roles` and in the app; moderation section absent |
+| Final creator pages on preview `3i7cxf58w` | Tier `creator` with the approved request; team member shown as removed with the accepted invitation retained; draft rights show both accepted and rejected declarations; QA community listed; one media row and zero attached links |
+| Final guest checks on preview `3i7cxf58w` | Community page shows the sign-in-to-request CTA and the request-only note; draft URL returns 404 with no content |
 
 Database state after the run: account tier `creator`; two safety reports
 `dismissed`, zero open; accepted and rejected rights declarations present; one media
-metadata row (the duplicate was removed); one public QA community; the team
-membership removed. `app_private.staff_roles` for the QA staff account is back to
-`reviewer`.
+metadata row (the retry duplicates were removed) with zero `work_media` links; one
+public QA community with zero membership rows; the team membership removed.
+`app_private.staff_roles` for the QA staff account is back to `reviewer`.
 
 ## Defects found and fixed
 
@@ -83,6 +103,14 @@ membership removed. `app_private.staff_roles` for the QA staff account is back t
 4. **Rights form was offered for published works.** Now limited to drafts, with an
    explicit explanation for published works.
 5. **Stray non-Arabic label** in the creator community listing. Removed.
+6. **Merged join action tried to self-activate.** The remote `joinCommunityAction`
+   updated an existing row to `active`, which RLS silently rejected. Rewritten to
+   insert/update only `requested`, to support withdrawal and re-request, and to show
+   the pending/withdraw state. No self-activation path remains.
+7. **Media attachment rejected pending assets.** The merged UI records roles before
+   upload, but the link policy accepted only `uploaded`/`ready` assets, so every
+   metadata-only link failed with `?error=link` and left an orphan asset row. The
+   policy now accepts the owner's own `initiated` asset for the owner's draft.
 
 ## Not proven / still OPEN or blocked
 
@@ -99,7 +127,7 @@ membership removed. `app_private.staff_roles` for the QA staff account is back t
 ## QA data and cleanup
 
 The QA accounts and rows remain on the preview, clearly labeled. They must not be
-presented as real content. To remove all QA data created up to 2026-11-08, run the
+presented as real content. To remove all QA data created up to 2026-11-09, run the
 following in the isolated project's SQL editor. Deleting profiles alone is not
 enough: several rows use `on delete restrict` references.
 
@@ -127,10 +155,24 @@ where subject_id in (
 
 delete from public.safety_reports
  where reporter_account_id = 'ead4e980-7410-47e9-8c97-41c9a0899489';
+delete from public.community_memberships
+ where account_id in (
+   'ead4e980-7410-47e9-8c97-41c9a0899489',
+   'a74cafd0-db46-44c5-a335-8d23ca688e27'
+ );
 delete from public.communities
  where created_by = 'ead4e980-7410-47e9-8c97-41c9a0899489';
 delete from public.rights_declarations
  where claimant_account_id = 'ead4e980-7410-47e9-8c97-41c9a0899489';
+delete from public.work_media
+ where work_id in (
+   select id from public.works
+    where created_by = 'ead4e980-7410-47e9-8c97-41c9a0899489'
+ )
+    or asset_id in (
+      select id from public.media_assets
+       where owner_account_id = 'ead4e980-7410-47e9-8c97-41c9a0899489'
+    );
 delete from public.media_assets
  where owner_account_id = 'ead4e980-7410-47e9-8c97-41c9a0899489';
 delete from public.works
@@ -161,8 +203,9 @@ dashboard or Admin API after the profile rows.
 ## Migration status
 
 `20261108000100_community_creation_requires_active_identity.sql`,
-`20261108000200_fix_community_rls_recursion.sql`, and
-`20261108000300_fix_safety_report_decision_cast.sql` are committed to the
-repository and were applied to the isolated `ravine-vision` Supabase project with
-explicit founder authorization. They must never be applied to the legacy RAVINE
-projects.
+`20261108000200_fix_community_rls_recursion.sql`,
+`20261108000300_fix_safety_report_decision_cast.sql`,
+`20261109000100_allow_community_membership_rerequest.sql`, and
+`20261109000200_allow_pending_media_metadata_links.sql` are in the repository and
+were applied to the isolated `ravine-vision` Supabase project with explicit founder
+authorization. They must never be applied to the legacy RAVINE projects.

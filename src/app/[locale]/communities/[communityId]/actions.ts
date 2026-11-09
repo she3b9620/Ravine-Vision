@@ -4,10 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function joinCommunityAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "ar") === "en" ? "en" : "ar";
   const communityId = String(formData.get("community_id") ?? "").trim();
-  if (!communityId) return;
+  if (!uuidPattern.test(communityId)) return;
+  const route = `/${locale}/communities/${communityId}`;
 
   const supabase = await createClient();
   const {
@@ -18,7 +21,8 @@ export async function joinCommunityAction(formData: FormData) {
     redirect(`/${locale}/login`);
   }
 
-  // Check if membership row already exists
+  // Membership is request-only. The account never grants itself active status;
+  // owner approval remains an OPEN workflow decision.
   const { data: existing } = await supabase
     .from("community_memberships")
     .select("status")
@@ -26,30 +30,35 @@ export async function joinCommunityAction(formData: FormData) {
     .eq("account_id", user.id)
     .maybeSingle();
 
+  let error = null;
   if (existing) {
-    if (existing.status !== "active") {
-      await supabase
+    if (existing.status === "left") {
+      const result = await supabase
         .from("community_memberships")
-        .update({ status: "active" })
+        .update({ status: "requested" })
         .eq("community_id", communityId)
         .eq("account_id", user.id);
+      error = result.error;
     }
   } else {
-    await supabase.from("community_memberships").insert({
+    const result = await supabase.from("community_memberships").insert({
       community_id: communityId,
       account_id: user.id,
       role: "member",
-      status: "active",
+      status: "requested",
     });
+    error = result.error;
   }
 
-  revalidatePath(`/${locale}/communities/${communityId}`);
+  if (error) redirect(route + "?error=membership");
+  revalidatePath(route);
 }
 
 export async function leaveCommunityAction(formData: FormData) {
   const locale = String(formData.get("locale") ?? "ar") === "en" ? "en" : "ar";
   const communityId = String(formData.get("community_id") ?? "").trim();
-  if (!communityId) return;
+  if (!uuidPattern.test(communityId)) return;
+  const route = `/${locale}/communities/${communityId}`;
 
   const supabase = await createClient();
   const {
@@ -60,11 +69,12 @@ export async function leaveCommunityAction(formData: FormData) {
     redirect(`/${locale}/login`);
   }
 
-  await supabase
+  const { error } = await supabase
     .from("community_memberships")
     .update({ status: "left" })
     .eq("community_id", communityId)
     .eq("account_id", user.id);
 
-  revalidatePath(`/${locale}/communities/${communityId}`);
+  if (error) redirect(route + "?error=membership");
+  revalidatePath(route);
 }

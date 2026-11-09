@@ -11,14 +11,14 @@ type Props = {
   communityId: string;
   locale: string;
   isAuthenticated: boolean;
-  isMember: boolean;
+  membershipStatus: string | null;
 };
 
 export default function CommunityMembershipButton({
   communityId,
   locale,
   isAuthenticated,
-  isMember,
+  membershipStatus,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const ar = locale === "ar";
@@ -27,7 +27,7 @@ export default function CommunityMembershipButton({
     return (
       <div className="community-guest-join">
         <RAVINEOpenAuth className="action-button-accent">
-          {ar ? "تسجيل الدخول للانضمام والمشاركة ↗" : "Sign in to join and participate ↗"}
+          {ar ? "تسجيل الدخول لطلب الانضمام والمشاركة ↗" : "Sign in to request membership ↗"}
         </RAVINEOpenAuth>
       </div>
     );
@@ -45,7 +45,7 @@ export default function CommunityMembershipButton({
     });
   };
 
-  if (isMember) {
+  if (membershipStatus === "active") {
     return (
       <div className="community-membership-active-bar">
         <span className="community-member-badge">
@@ -72,6 +72,33 @@ export default function CommunityMembershipButton({
     );
   }
 
+  if (membershipStatus === "requested") {
+    return (
+      <div className="community-membership-active-bar">
+        <span className="community-member-badge">
+          {ar ? "◷ طلب الانضمام قيد المراجعة" : "◷ Membership request pending"}
+        </span>
+        <form action={handleLeave} style={{ display: "inline" }}>
+          <input type="hidden" name="locale" value={locale} />
+          <input type="hidden" name="community_id" value={communityId} />
+          <button
+            type="submit"
+            className="community-leave-button"
+            disabled={isPending}
+          >
+            {isPending
+              ? ar
+                ? "جارٍ المعالجة..."
+                : "Processing..."
+              : ar
+              ? "سحب الطلب"
+              : "Withdraw request"}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <form action={handleJoin}>
       <input type="hidden" name="locale" value={locale} />
@@ -83,11 +110,11 @@ export default function CommunityMembershipButton({
       >
         {isPending
           ? ar
-            ? "جارٍ الانضمام..."
-            : "Joining..."
+            ? "جارٍ إرسال الطلب..."
+            : "Sending request..."
           : ar
-          ? "الانضمام إلى المجتمع ↗"
-          : "Join Community ↗"}
+          ? "طلب الانضمام إلى المجتمع ↗"
+          : "Request to join ↗"}
       </button>
     </form>
   );

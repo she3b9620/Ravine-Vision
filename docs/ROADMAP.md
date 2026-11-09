@@ -84,7 +84,7 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   upload remains an OPEN provider decision. No production deployment and no changes
   to `main` or the legacy repositories.
 
-- **2026-11-08 (OAuth & Interaction Expansion)** — Google OAuth verified active (google: true) on Supabase with multi-client architecture prepared for Web, Desktop, and Android. Built theatrical stage presentation for works, charter-driven reactions (appreciate, thoughtful, inspiring), and dignified reflections thread. Added community membership join/leave actions and creator work follow flow. All 41 Vitest tests pass; Next.js production build passes across all 40 routes with 0 errors.
+- **2026-11-08 (OAuth & Interaction Expansion)** — Google OAuth verified active (google: true) on Supabase with multi-client architecture prepared for Web, Desktop, and Android. Built theatrical stage presentation for works, charter-driven reactions (appreciate, thoughtful, inspiring), and dignified reflections thread. Added a request-only community membership request/withdraw flow and creator work follow flow. All 41 Vitest tests pass; Next.js production build passes across all 40 routes with 0 errors.
 - **2026-11-08** — Community creation and trust flows exercised on the preview
   deployment `https://ravine-vision-8v0fruxcs-she3b9620.vercel.app`. Public
   community creation now works from `/creator/community` for an active creative
@@ -104,3 +104,21 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   needs external verification. See
   [Community and Trust Flows — Preview Verification](COMMUNITY_AND_TRUST_VERIFICATION.md).
   No production deployment and no changes to `main` or the legacy repositories.
+- **2026-11-09** — Merged six newer remote commits (charter page, media roles,
+  community join/leave, follows, Google button, work reactions) into
+  `preview/vercel-review` without force-push, then fixed two integration defects on
+  preview `https://ravine-vision-3i7cxf58w-she3b9620.vercel.app`. The merged join
+  action tried to self-activate membership (`active`), which RLS silently rejected;
+  it now records only `requested`, supports withdraw and re-request, and never
+  grants active status. The merged media UI records roles before upload, but the
+  link policy accepted only `uploaded`/`ready` assets; migration
+  `20261109000200_allow_pending_media_metadata_links.sql` allows metadata-only links
+  for the owner's own `initiated` asset on the owner's draft. Migration
+  `20261109000100_allow_community_membership_rerequest.sql` limits self-updates to
+  `requested`/`left`. End-to-end checks passed for request → pending → withdraw →
+  request again → withdraw, guest community access, draft 404, metadata link →
+  detach, creator tier/rights/team pages, and the reviewer moderation boundary;
+  test rows were cleaned up. 41/41 tests, lint, and the production build pass. Owner
+  approval, community governance, media upload/playback, published-work claims, team
+  capabilities, and cross-client Google sign-in remain OPEN or blocked. No
+  production deployment and no changes to `main` or the legacy repositories.

@@ -25,17 +25,20 @@ function creatorOf(community: CommunityData) {
 
 export default async function CommunityDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; communityId: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { locale, communityId } = await params;
+  const query = await searchParams;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
 
   let community: CommunityData | null = null;
   let memberCount = 0;
   let userLoggedIn = false;
-  let isMember = false;
+  let membershipStatus: string | null = null;
 
   if (getSupabaseEnvironment()) {
     try {
@@ -69,7 +72,7 @@ export default async function CommunityDetailPage({
             .eq("account_id", userRes.user.id)
             .maybeSingle();
 
-          isMember = myMem?.status === "active";
+          membershipStatus = myMem?.status ?? null;
         }
       }
     } catch {
@@ -116,14 +119,27 @@ export default async function CommunityDetailPage({
           <span>{ar ? "مستوى الخصوصية: عام" : "Privacy: Public"}</span>
         </div>
 
+        {query.error === "membership" && (
+          <p className="community-request-note" role="alert">
+            {ar
+              ? "تعذر تحديث عضوية المجتمع. حاول مرة أخرى."
+              : "Could not update community membership. Try again."}
+          </p>
+        )}
+
         <div className="community-actions">
           <CommunityMembershipButton
             communityId={community.id}
             locale={locale}
             isAuthenticated={userLoggedIn}
-            isMember={isMember}
+            membershipStatus={membershipStatus}
           />
         </div>
+        <p className="community-request-note">
+          {ar
+            ? "الانضمام يُسجَّل كطلب. لا يمنح النظام العضوية النشطة تلقائيًا؛ مسار موافقة المالك لم يُعتمد بعد."
+            : "Membership is recorded as a request. The system does not self-activate members; owner approval is not approved yet."}
+        </p>
       </section>
 
       <footer className="community-footer">
