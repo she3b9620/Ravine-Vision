@@ -2,10 +2,10 @@
 
 **Date:** 2026-11-08 (continued into 2026-11-09)
 **Environment:** isolated `ravine-vision` Vercel preview
-`https://ravine-vision-3i7cxf58w-she3b9620.vercel.app` (branch
-`preview/vercel-review`; built from commit `043d9c0` plus the community-request
-and media-link fixes recorded here). The earlier checks ran on
-`https://ravine-vision-8v0fruxcs-she3b9620.vercel.app`.
+`https://ravine-vision-5vxgto84n-she3b9620.vercel.app` (branch
+`preview/vercel-review`; built from commit `990f7ab`). The same flows were first
+exercised on `https://ravine-vision-3i7cxf58w-she3b9620.vercel.app`, and the earlier
+trust checks ran on `https://ravine-vision-8v0fruxcs-she3b9620.vercel.app`.
 **Database:** isolated Supabase project `pkgtxlmfzsvjarfdhhov` only
 **Status:** preview verification with clearly labeled QA data. No production
 promotion, no `main` changes, and no legacy project changes.
@@ -80,8 +80,8 @@ All actions below ran through the deployed app with real authenticated sessions.
 | `reviewer` opens `/review` | Review queues visible; safety/moderation section absent |
 | Staff role temporarily raised to `admin` | Both QA reports dismissed with notes; audit events recorded |
 | Staff role reverted to `reviewer` | Verified in `app_private.staff_roles` and in the app; moderation section absent |
-| Final creator pages on preview `3i7cxf58w` | Tier `creator` with the approved request; team member shown as removed with the accepted invitation retained; draft rights show both accepted and rejected declarations; QA community listed; one media row and zero attached links |
-| Final guest checks on preview `3i7cxf58w` | Community page shows the sign-in-to-request CTA and the request-only note; draft URL returns 404 with no content |
+| Final creator pages on preview `5vxgto84n` | Tier `creator` with the approved request; team member shown as removed with the accepted invitation retained; draft rights show both accepted and rejected declarations; QA community listed; one media row and zero attached links |
+| Final guest and session checks on preview `5vxgto84n` | Community page shows the sign-in-to-request CTA and the request-only note; draft URL returns 404 with no content; `reviewer` sees the review queues without the safety/moderation section; join request → pending → withdraw repeated successfully |
 
 Database state after the run: account tier `creator`; two safety reports
 `dismissed`, zero open; accepted and rejected rights declarations present; one media

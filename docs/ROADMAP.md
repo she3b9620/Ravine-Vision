@@ -106,9 +106,11 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   No production deployment and no changes to `main` or the legacy repositories.
 - **2026-11-09** — Merged six newer remote commits (charter page, media roles,
   community join/leave, follows, Google button, work reactions) into
-  `preview/vercel-review` without force-push, then fixed two integration defects on
-  preview `https://ravine-vision-3i7cxf58w-she3b9620.vercel.app`. The merged join
-  action tried to self-activate membership (`active`), which RLS silently rejected;
+  `preview/vercel-review` without force-push, then fixed two integration defects and
+  verified them on preview `https://ravine-vision-3i7cxf58w-she3b9620.vercel.app`,
+  with the final checks repeated on
+  `https://ravine-vision-5vxgto84n-she3b9620.vercel.app` (commit `990f7ab`). The
+  merged join action tried to self-activate membership (`active`), which RLS silently rejected;
   it now records only `requested`, supports withdraw and re-request, and never
   grants active status. The merged media UI records roles before upload, but the
   link policy accepted only `uploaded`/`ready` assets; migration
