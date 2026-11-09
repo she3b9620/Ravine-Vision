@@ -112,10 +112,42 @@ public QA community with zero membership rows; the team membership removed.
    metadata-only link failed with `?error=link` and left an orphan asset row. The
    policy now accepts the owner's own `initiated` asset for the owner's draft.
 
+## Product decisions recorded (no longer OPEN)
+
+These founder decisions were recorded on 2026-11-09 and are **not** yet implemented
+in code. Implementation order: web first; Desktop/Android Google OAuth and native
+clients come later.
+
+1. **App / consent-screen name:** `Ravine` (Google Cloud Branding App name set to
+   `RAVINE`; account chooser shows "المتابعة إلى RAVINE").
+2. **Community privacy levels:** Two tiers exist:
+   - **Public communities:** open to everyone, but entry requires answering a short
+     set of questions or passing a simple test so members understand the community
+     before joining.
+   - **Private communities:** creator tier and above can create a private space and
+     a private community for themselves; works like groups/spaces/subs — members and
+     creators join and share normally within that community.
+3. **Owner approval:** The community owner has the right to approve or reject join
+   requests.
+4. **Moderator roles:** Standard moderator roles exist, responsible for community
+   tasks that maintain the community and its safety.
+5. **Creator tier promotion:** Promotion to creator tier and above uses a defined
+   rating system with recommendations from higher tiers, to avoid injustice; there is
+   a cap on the number of ratings and a required number of recommendations for
+   promotion to the next tier.
+6. **Community rules:** Copyright/IP policy and forum guidelines exist to protect
+   the community.
+
+Remaining OPEN items stay listed below.
+
 ## Not proven / still OPEN or blocked
 
-- Community privacy levels, discoverability rules, governance, and moderator roles.
-- Owner approval or rejection of join requests; joining is request-only today.
+- Community content, posts, and membership management beyond listing.
+- Rights claims, licensing, disputes, and appeals for published works.
+- Actual media upload, processing, playback, retention, and storage provider.
+- Enforcement of creator-team role capabilities; membership alone grants no work,
+  media, rights, or finance access.
+- Google OAuth consent-screen branding still names the Supabase project URL
 - Community content, posts, and membership management beyond listing.
 - Rights claims, licensing, disputes, and appeals for published works.
 - Actual media upload, processing, playback, retention, and storage provider.

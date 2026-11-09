@@ -125,12 +125,13 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   capabilities, and cross-client Google sign-in remain OPEN or blocked. No
   production deployment and no changes to `main` or the legacy repositories.
 
-- **2026-11-09 (Google Cloud consent branding)** — Set OAuth App name to `RAVINE`
+- **2026-11-09 (Google Cloud consent branding)** — Set OAuth App name to `Ravine`
   in Google Cloud Branding (`User support email: she3b9620@gmail.com`). Account
   chooser now shows "المتابعة إلى RAVINE". Consent screen body still names
   `pkgtxlmfzsvjarfdhhov.supabase.co` pending OAuth client name update/propagation.
-  Cross-client (Desktop/Android) Google OAuth remains OPEN. No production
-  deployment and no changes to `main` or the legacy repositories.
+  Cross-client (Desktop/Android) Google OAuth remains OPEN; web-first per founder
+  decision. No production deployment and no changes to `main` or the legacy
+  repositories.
 
 - **2026-11-09 (Google OAuth web)** — Supabase URL configuration corrected:
   `Site URL` now points to the stable preview alias, with the stable alias and the
@@ -146,3 +147,32 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   production build pass. Cross-client (Desktop/Android) Google OAuth and Google
   Cloud consent-screen branding remain OPEN. No production deployment and no
   changes to `main` or the legacy repositories.
+
+## Product decisions recorded (2026-11-09)
+
+These founder decisions are **not** yet implemented in code. Implementation order:
+web first; Desktop/Android Google OAuth and native clients come later.
+
+1. **App / consent-screen name:** `Ravine` (Google Cloud Branding App name set to
+   `RAVINE`; account chooser shows "المتابعة إلى RAVINE").
+2. **Community privacy levels:** Two tiers exist:
+   - **Public communities:** open to everyone, but entry requires answering a short
+     set of questions or passing a simple test so members understand the community
+     before joining.
+   - **Private communities:** creator tier and above can create a private space and
+     a private community for themselves; works like groups/spaces/subs — members and
+     creators join and share normally within that community.
+3. **Owner approval:** The community owner has the right to approve or reject join
+   requests.
+4. **Moderator roles:** Standard moderator roles exist, responsible for community
+   tasks that maintain the community and its safety.
+5. **Creator tier promotion:** Promotion to creator tier and above uses a defined
+   rating system with recommendations from higher tiers, to avoid injustice; there is
+   a cap on the number of ratings and a required number of recommendations for
+   promotion to the next tier.
+6. **Community rules:** Copyright/IP policy and forum guidelines exist to protect
+   the community.
+
+Remaining implementation items stay OPEN (content/posts/membership management,
+published-work rights/licensing/disputes/appeals, media upload/playback/storage,
+team capability enforcement, moderation sanctions/appeals/retention).
