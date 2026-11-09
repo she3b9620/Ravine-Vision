@@ -33,7 +33,7 @@ This roadmap sequences engineering work without locking unresolved product choic
 - [x] Discovery and viewing (Guest hero showcase with Video/Image mode, public works, creators, and communities discovery linked to real database tables).
 - [x] Personal account and multiple creator identities.
 - [x] Creator workspace and publishing lifecycle.
-- [x] Communities, live/audio, and collaboration in staged releases (Community creation, detail view, active membership join/leave, creator teams, and invitation lifecycle).
+- [ ] Communities, live/audio, and collaboration in staged releases — community creation, detail view, request-only membership, creator teams, and invitation lifecycle are previewed; live/audio and collaboration remain OPEN.
 - [x] Work detail theatrical presentation, charter-driven reactions (appreciate/thoughtful/inspiring), and dignified discourse reflections.
 - [x] Creator profile following connection and community linkage.
 
@@ -85,3 +85,22 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   to `main` or the legacy repositories.
 
 - **2026-11-08 (OAuth & Interaction Expansion)** — Google OAuth verified active (google: true) on Supabase with multi-client architecture prepared for Web, Desktop, and Android. Built theatrical stage presentation for works, charter-driven reactions (appreciate, thoughtful, inspiring), and dignified reflections thread. Added community membership join/leave actions and creator work follow flow. All 41 Vitest tests pass; Next.js production build passes across all 40 routes with 0 errors.
+- **2026-11-08** — Community creation and trust flows exercised on the preview
+  deployment `https://ravine-vision-8v0fruxcs-she3b9620.vercel.app`. Public
+  community creation now works from `/creator/community` for an active creative
+  identity, and the public directory/detail pages render it. The run exposed and
+  fixed an **infinite RLS recursion** between `communities` and
+  `community_memberships` (every read failed with `42P17` and appeared as an empty
+  list), plus a `text`-to-`case_status` cast defect that made every safety-report
+  decision fail. Tier request → staff approval, draft creation, media metadata
+  registration, rights declaration accept/reject, team invite → accept → remove,
+  safety-report submission → dismissal, and the reviewer/admin boundary were all
+  exercised with labeled QA sessions. Migrations `20261108000100`,
+  `20261108000200`, and `20261108000300` were applied to the isolated project with
+  founder authorization. The temporary `admin` staff role used for the moderation
+  test was reverted to `reviewer` and verified. Community privacy/governance, join
+  approval, published-work claims, media storage, and team capability enforcement
+  remain OPEN; end-to-end Google sign-in across Web, Desktop, and Android still
+  needs external verification. See
+  [Community and Trust Flows — Preview Verification](COMMUNITY_AND_TRUST_VERIFICATION.md).
+  No production deployment and no changes to `main` or the legacy repositories.

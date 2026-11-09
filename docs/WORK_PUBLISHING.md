@@ -104,3 +104,10 @@ The matching `auth.users` rows must be removed through the Supabase Authenticati
 dashboard (or the Admin API) before those profile rows; delete them in that order.
 QA data is intentionally kept for now and is clearly labeled, not passed off as real
 content.
+
+> **2026-11-08 update:** the community and trust verification added QA rows that
+> reference profiles with `on delete restrict` (communities, rights declarations,
+> safety reports, team invitations). The combined cleanup query for all QA data is
+> maintained in
+> [Community and Trust Flows — Preview Verification](COMMUNITY_AND_TRUST_VERIFICATION.md#qa-data-and-cleanup).
+> Use it instead of the partial query above when removing the combined dataset.
