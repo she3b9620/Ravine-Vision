@@ -172,7 +172,7 @@ project `pkgtxlmfzsvjarfdhhov`.
   confirming the callback repopulated `public.profiles.display_name`.
 
 **Still OPEN / blocked:**
-- Google Cloud consent-screen branding still names `pkgtxlmfzsvjarfdhhov.supabase.co`.
+- Google Cloud consent-screen branding: App name set to `RAVINE` in Google Cloud Branding (account chooser now shows "المتابعة إلى RAVINE"), but the consent screen body still names `pkgtxlmfzsvjarfdhhov.supabase.co` pending OAuth client name update/propagation.
 - Cross-client Google OAuth on Desktop and Android is not verified.
 - No production deployment and no changes to `main` or the legacy repositories.
 

@@ -125,6 +125,13 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   capabilities, and cross-client Google sign-in remain OPEN or blocked. No
   production deployment and no changes to `main` or the legacy repositories.
 
+- **2026-11-09 (Google Cloud consent branding)** — Set OAuth App name to `RAVINE`
+  in Google Cloud Branding (`User support email: she3b9620@gmail.com`). Account
+  chooser now shows "المتابعة إلى RAVINE". Consent screen body still names
+  `pkgtxlmfzsvjarfdhhov.supabase.co` pending OAuth client name update/propagation.
+  Cross-client (Desktop/Android) Google OAuth remains OPEN. No production
+  deployment and no changes to `main` or the legacy repositories.
+
 - **2026-11-09 (Google OAuth web)** — Supabase URL configuration corrected:
   `Site URL` now points to the stable preview alias, with the stable alias and the
   verified final preview allowlisted; old and malformed redirect URLs removed.
