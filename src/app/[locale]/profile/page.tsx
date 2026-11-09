@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireUser } from "@/lib/supabase/session";
+import { resolveDisplayName } from "@/lib/display-name";
 import { signOutAction } from "../auth/actions";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ export default async function ProfilePage({ params }: Props) {
     .eq("id", user.id)
     .maybeSingle();
 
-  const displayName = profile?.display_name || String(user.user_metadata?.display_name ?? "") || (ar ? "عضو رَافِين" : "RAVINE member");
+  const displayName = profile?.display_name?.trim() || resolveDisplayName(user.user_metadata) || (ar ? "عضو رَافِين" : "RAVINE member");
   const tierLabels: Record<string, string> = ar
     ? { viewer: "مشاهد", creator: "مبدع", verified: "مبدع موثّق", select: "Select" }
     : { viewer: "Viewer", creator: "Creator", verified: "Verified creator", select: "Select" };

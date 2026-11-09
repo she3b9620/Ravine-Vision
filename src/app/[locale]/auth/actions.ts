@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import { getSiteOrigin } from "@/lib/site-origin";
+import { resolveDisplayName } from "@/lib/display-name";
 
 const path = (locale: string, route: string) => "/" + (locale === "en" ? "en" : "ar") + route;
 
@@ -24,7 +25,15 @@ export async function signInAction(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) redirect(path(locale, "/login?error=credentials"));
   const { data: { user } } = await supabase.auth.getUser();
-  if (user) await supabase.from("profiles").upsert({ id: user.id, display_name: String(user.user_metadata?.display_name ?? "") }, { onConflict: "id", ignoreDuplicates: true });
+  if (user) {
+    const displayName = resolveDisplayName(user.user_metadata);
+    await supabase.from("profiles").upsert({ id: user.id, display_name: displayName }, { onConflict: "id", ignoreDuplicates: true });
+    if (displayName) {
+      // Fill a profile created before provider metadata was understood, but never
+      // overwrite a name the account holder has since chosen.
+      await supabase.from("profiles").update({ display_name: displayName }).eq("id", user.id).eq("display_name", "");
+    }
+  }
   redirect(path(locale, "/profile"));
 }
 

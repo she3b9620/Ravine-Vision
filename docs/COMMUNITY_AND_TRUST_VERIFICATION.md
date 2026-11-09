@@ -121,8 +121,60 @@ public QA community with zero membership rows; the team membership removed.
 - Actual media upload, processing, playback, retention, and storage provider.
 - Enforcement of creator-team role capabilities; membership alone grants no work,
   media, rights, or finance access.
-- Google OAuth end-to-end sign-in (external Google Cloud/Supabase configuration).
+- Google OAuth consent-screen branding still names the Supabase project URL
+  (`pkgtxlmfzsvjarfdhhov.supabase.co`); Google Cloud app name/branding is not
+  configured.
+- Cross-client Google OAuth on Desktop and Android is not verified.
+- Web Google OAuth is now verified end-to-end (see below); it is no longer
+  listed as fully unproven, but the two items above remain OPEN.
 - Moderation standards, sanctions, appeals, and retention policy.
+
+## Google OAuth web verification (2026-11-09)
+
+**Environment:** stable branch alias
+`https://ravine-vision-git-preview-vercel-review-she3b9620.vercel.app` (now
+serving deployment `gfiysnbmb`), with the final direct preview
+`https://ravine-vision-5vxgto84n-she3b9620.vercel.app` still allowlisted. Supabase
+project `pkgtxlmfzsvjarfdhhov`.
+
+**Supabase URL configuration change:**
+- `Site URL` was `http://localhost:3000`; corrected to the stable branch alias.
+- Allowlist was only the old preview `ravine-vision-1mihy6b9h-...` plus a malformed
+  combined URL; corrected to the stable alias plus the verified final preview
+  `ravine-vision-5vxgto84n-...`. The old/malformed entries were removed.
+- Google provider remains enabled; email provider enabled; `mailer_autoconfirm=false`.
+
+**Verified path:**
+- Guest `/ar/login` renders "Continue with Google" only because `/auth/v1/settings`
+  reports `google: true`.
+- Clicking it calls `signInWithGoogleAction`, which derives the origin from the
+  request (`getSiteOrigin`) and redirects to Supabase with
+  `redirectTo=https://ravine-vision-git-preview-vercel-review-she3b9620.vercel.app/ar/auth/callback`.
+- Google account chooser and consent screen appear; consent granted.
+- Supabase redirects to `/ar/auth/callback?code=...`; `exchangeCodeForSession`
+  succeeds; `profiles` is upserted and the browser lands on `/ar/profile`.
+- Profile shows the real founder account `she3b9620@gmail.com` / `Muhammad Shaaban`,
+  tier `viewer`, with an active session and working sign-out.
+- Database row: `auth.users` provider `google`, `email_verified=true`,
+  `raw_user_meta_data.full_name = "Muhammad Shaaban"`; `public.profiles`
+  `display_name = "Muhammad Shaaban"`, `account_tier = viewer`,
+  `preferred_locale = ar`, `discoverable = true`.
+
+**Code change made during this review:**
+- `src/lib/display-name.ts` resolves a display name from `display_name`,
+  `full_name`, then `name`, so Google OAuth no longer stores an empty name.
+- `/auth/callback` and `signInAction` fill an empty profile name without
+  overwriting a later user-chosen name.
+- `/ar/profile` falls back to the same resolver before the neutral "RAVINE member"
+  label.
+- Verified by emptying the founder profile name, reloading `/ar/profile` (fallback
+  showed "Muhammad Shaaban"), signing out, signing in with Google again, and
+  confirming the callback repopulated `public.profiles.display_name`.
+
+**Still OPEN / blocked:**
+- Google Cloud consent-screen branding still names `pkgtxlmfzsvjarfdhhov.supabase.co`.
+- Cross-client Google OAuth on Desktop and Android is not verified.
+- No production deployment and no changes to `main` or the legacy repositories.
 
 ## QA data and cleanup
 

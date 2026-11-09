@@ -124,3 +124,18 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   approval, community governance, media upload/playback, published-work claims, team
   capabilities, and cross-client Google sign-in remain OPEN or blocked. No
   production deployment and no changes to `main` or the legacy repositories.
+
+- **2026-11-09 (Google OAuth web)** — Supabase URL configuration corrected:
+  `Site URL` now points to the stable preview alias, with the stable alias and the
+  verified final preview allowlisted; old and malformed redirect URLs removed.
+  Google sign-in verified end-to-end on
+  `https://ravine-vision-git-preview-vercel-review-she3b9620.vercel.app`: account
+  chooser → consent → `/ar/auth/callback` → `/ar/profile` for the real founder
+  account `she3b9620@gmail.com` (`Muhammad Shaaban`), provider `google`, email
+  verified, profile created with `display_name = "Muhammad Shaaban"`. Added
+  `src/lib/display-name.ts` so Google metadata (`full_name`/`name`) is preferred
+  over the email-derived fallback; empty profiles are backfilled without
+  overwriting a user-chosen name. 47/47 Vitest tests, lint (0 errors), and the
+  production build pass. Cross-client (Desktop/Android) Google OAuth and Google
+  Cloud consent-screen branding remain OPEN. No production deployment and no
+  changes to `main` or the legacy repositories.
