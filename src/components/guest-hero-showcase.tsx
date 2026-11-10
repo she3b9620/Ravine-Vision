@@ -129,6 +129,7 @@ export default function GuestHeroShowcase({ locale }: Props) {
             </div>
           ) : (
             <div className="rv-image-wrapper">
+              {/* eslint-disable-next-line @next/next/no-img-element -- static, above-the-fold hero asset styled by CSS */}
               <img
                 src="/showcase/cinematic-hero.png"
                 alt={ar ? "لقطة سينمائية من أعمال رافين" : "Cinematic still from RAVINE works"}

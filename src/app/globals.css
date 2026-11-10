@@ -680,5 +680,15 @@ html[data-theme="light"] :is(.rv-shell,.rv-discover-page) :is(.rv-kicker,.rv-eye
 .secondary-action-link{font-size:14px;color:#d49a78;text-decoration:underline}
 .secondary-action-link:hover{color:#f1e9dc}
 
+/* Entry quiz builder */
+.entry-quiz-section{display:grid;gap:16px}
+.entry-quiz-builder{display:grid;gap:14px}
+.quiz-builder-item{display:grid;gap:12px;border:1px solid #ffffff24;border-radius:8px;padding:16px}
+.quiz-builder-item legend{padding:0 7px;color:#d8d0c5;font-size:13px}
+.quiz-builder-add,.quiz-builder-remove{justify-self:start;cursor:pointer;border-radius:8px;padding:10px 15px;font:inherit;font-size:13px;border:1px solid #ffffff26;background:#0d0f10;color:#f1e9dc}
+.quiz-builder-add{border-color:#c47a52}
+.quiz-builder-remove{color:#d8d0c5}
+.quiz-builder-add:hover,.quiz-builder-remove:hover{border-color:#c47a52;color:#f1e9dc}
+
 
 

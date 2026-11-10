@@ -148,6 +148,22 @@ No legacy migration or production integration beyond the isolated `ravine-vision
   Cloud consent-screen branding remain OPEN. No production deployment and no
   changes to `main` or the legacy repositories.
 
+- **2026-11-10 (Community governance fixes)** — Fixed the defects introduced with
+  the 2026-11-09 community feature. Owner approval/rejection was non-functional at
+  the database layer (the only membership UPDATE policy was self-scoped, so owner
+  updates matched zero rows, and DELETE had no grant); owners now have explicit
+  UPDATE/DELETE policies backed by `app_private.owns_community`. Entry-quiz answer
+  keys were stored in the publicly readable `communities.entry_questions` column;
+  they now live in the private `community_entry_answer_keys` table and are read
+  only by `SECURITY DEFINER` functions (`save_community_entry_quiz`,
+  `validate_community_entry_quiz`), so visitors can no longer fetch the answers.
+  Private community creation is wired up (public / discoverable-private /
+  invite-only) with an owner-only quiz editor at
+  `/[locale]/creator/community/[communityId]/quiz`. Localisation defects (Chinese
+  "返回" and the broken "aprov" string) and the raw-UUID pending-request list were
+  fixed. Migration `20261110000100` must be applied to the isolated project. All
+  tests, lint, typecheck, and the production build pass locally.
+
 ## Product decisions recorded (2026-11-09)
 
 These founder decisions are **not** yet implemented in code. Implementation order:

@@ -2,12 +2,18 @@ export type CommunityVisibility = "public" | "discoverable_private" | "invite_on
 
 export type CommunityRole = "owner" | "moderator" | "member";
 
+// Public shape. Answer keys are stored privately and never returned to clients.
 export type EntryQuestion = {
   id: string;
   question: string;
   type: "text" | "choice";
   options?: string[];
-  correct_answer?: string | string[];
+};
+
+// Owner-facing shape used when creating or editing a quiz. The answer key is sent
+// to a SECURITY DEFINER RPC and is never rendered to visitors.
+export type EntryQuestionInput = EntryQuestion & {
+  correct_answer: string | string[];
 };
 
 export type Community = {

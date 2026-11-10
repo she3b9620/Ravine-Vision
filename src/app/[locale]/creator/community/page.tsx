@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireUser } from "@/lib/supabase/session";
 import { EmptyState } from "@/components/empty-state";
+import EntryQuizBuilder from "@/components/entry-quiz-builder";
+import { VISIBILITY_LABELS, type CommunityVisibility } from "@/lib/community";
 import { createCommunity } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -48,11 +50,13 @@ export default async function CreatorCommunityPage({ params, searchParams }: Pro
     ? {
         validation: "راجع اسم المجتمع والوصف وميثاقه.",
         identity: "إنشاء المجتمع متاح فقط لهوية إبداعية نشطة ومعتمدة تابعة لحسابك.",
+        quiz: "تعذر حفظ أسئلة الدخول. راجع الأسئلة والإجابات وحاول مرة أخرى.",
         save: "تعذر إنشاء المجتمع. حاول مرة أخرى.",
       }
     : {
         validation: "Check the community name, description, and guidelines.",
         identity: "Community creation requires an active, approved creative identity owned by your account.",
+        quiz: "Could not save the entry quiz. Check the questions and answers and try again.",
         save: "Could not create the community. Try again.",
       };
 
@@ -71,11 +75,11 @@ export default async function CreatorCommunityPage({ params, searchParams }: Pro
 
       <section className="creator-intro">
         <p className="rv-eyebrow"><i />CREATOR COMMUNITY</p>
-        <h1>{ar ? "مجتمعاتك العامة." : "Your public communities."}</h1>
+        <h1>{ar ? "مجتمعاتك." : "Your communities."}</h1>
         <p>
           {ar
-            ? "أنشئ مجتمعًا عامًا حول عمل أو اهتمام إبداعي. مستويات الخصوصية والحوكمة والأدوار الإدارية تبقى قرارات مفتوحة، وقد تتوسع المؤسسة تدريجيًا."
-            : "Create a public community around a work or creative interest. Privacy levels, governance, and moderator roles remain OPEN decisions, and this foundation may expand gradually."}
+            ? "أنشئ مجتمعًا حول عمل أو اهتمام إبداعي، واختر مستواه: عام، أو خاص قابل للاكتشاف، أو دعوة فقط. الحوكمة والأدوار الإدارية تبقى قرارات مفتوحة."
+            : "Create a community around a work or creative interest and choose its level: public, discoverable-private, or invite-only. Governance and moderator roles remain OPEN decisions."}
         </p>
       </section>
 
@@ -93,7 +97,7 @@ export default async function CreatorCommunityPage({ params, searchParams }: Pro
       ) : (
         <>
           <section className="creator-panel">
-            <h2>{ar ? "إنشاء مجتمع عام" : "Create a public community"}</h2>
+            <h2>{ar ? "إنشاء مجتمع" : "Create a community"}</h2>
             {activeIdentities.length ? (
               <form action={createCommunity} className="creator-form">
                 <input type="hidden" name="locale" value={locale} />
@@ -110,16 +114,36 @@ export default async function CreatorCommunityPage({ params, searchParams }: Pro
                 <label>{ar ? "اسم المجتمع" : "Community name"}
                   <input name="name" required minLength={3} maxLength={80} />
                 </label>
+                <label>{ar ? "مستوى الخصوصية" : "Privacy level"}
+                  <select name="visibility" defaultValue="public">
+                    {(["public", "discoverable_private", "invite_only"] as CommunityVisibility[]).map(
+                      (visibility) => (
+                        <option key={visibility} value={visibility}>
+                          {ar ? VISIBILITY_LABELS[visibility].ar : VISIBILITY_LABELS[visibility].en}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </label>
                 <label>{ar ? "وصف مختصر (اختياري)" : "Short description (optional)"}
                   <textarea name="description" rows={3} maxLength={600} />
                 </label>
                 <label>{ar ? "ميثاق المجتمع وقواعده (اختياري)" : "Community charter & guidelines (optional)"}
                   <textarea name="guidelines" rows={4} maxLength={2000} />
                 </label>
+                <div className="entry-quiz-section">
+                  <h3>{ar ? "أسئلة الدخول (اختياري)" : "Entry quiz questions (optional)"}</h3>
+                  <p className="creator-muted">
+                    {ar
+                      ? "تظهر أسئلة الدخول للزوار قبل إرسال طلب الانضمام، والإجابات الصحيحة تبقى خاصة."
+                      : "Entry questions are shown before a join request is sent; correct answers stay private."}
+                  </p>
+                  <EntryQuizBuilder locale={locale} />
+                </div>
                 <p className="creator-muted">
                   {ar
-                    ? "يُنشأ المجتمع عامًا ويظهر في دليل المجتمعات. لا يمكن حاليًا تغيير مستواه إلى خاص أو دعوة فقط؛ هذه السياسة لم تُعتمد بعد."
-                    : "The community is created as public and appears in the community directory. Changing it to private or invite-only is not available yet; that policy has not been approved."}
+                    ? "المجتمع العام يظهر للجميع. الخاص القابل للاكتشاف يظهر للمستخدمين المسجّلين، ودعوة فقط يظهر للمالك والأعضاء فقط. أصحاب المجتمع يوافقون على طلبات الانضمام دائماً."
+                    : "Public communities are visible to everyone, discoverable-private ones to signed-in accounts, and invite-only ones only to the owner and members. Community owners always approve join requests."}
                 </p>
                 <button className="creator-submit" type="submit">{ar ? "إنشاء المجتمع" : "Create community"} ↗</button>
               </form>
@@ -141,13 +165,25 @@ export default async function CreatorCommunityPage({ params, searchParams }: Pro
                     <div className="rv-community-info">
                       <h3>{community.name}</h3>
                       <p className="rv-community-desc">{community.description ?? ""}</p>
-                      <span className="rv-community-visibility">{community.visibility}</span>
+                      <span className="rv-community-visibility">
+                        {ar
+                          ? (VISIBILITY_LABELS[community.visibility as CommunityVisibility]?.ar ??
+                            community.visibility)
+                          : (VISIBILITY_LABELS[community.visibility as CommunityVisibility]?.en ??
+                            community.visibility)}
+                      </span>
                       {community.owner_creator_identity_id && (
                         <small>{ar ? "الهوية: " : "Identity: "}{identityName.get(community.owner_creator_identity_id) ?? "—"}</small>
                       )}
                     </div>
                     <Link href={"/" + locale + "/communities/" + community.id} className="rv-community-link">
                       {ar ? "عرض المجتمع" : "View community"} ↗
+                    </Link>
+                    <Link
+                      href={"/" + locale + "/creator/community/" + community.id + "/quiz"}
+                      className="rv-community-link"
+                    >
+                      {ar ? "إدارة اختبار الدخول" : "Manage entry quiz"} ↗
                     </Link>
                   </article>
                 ))}

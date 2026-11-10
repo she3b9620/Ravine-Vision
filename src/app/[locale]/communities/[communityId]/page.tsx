@@ -52,7 +52,7 @@ export default async function CommunityDetailPage({
   let userLoggedIn = false;
   let membershipStatus: string | null = null;
   let isOwner = false;
-  let pendingRequests: { accountId: string; status: string; createdAt: string | null }[] = [];
+  let pendingRequests: { accountId: string; status: string; createdAt: string | null; label: string }[] = [];
 
   if (getSupabaseEnvironment()) {
     try {
@@ -106,11 +106,25 @@ export default async function CommunityDetailPage({
               .eq("community_id", communityId)
               .eq("status", "requested");
 
-            if (pending) {
+            if (pending && pending.length > 0) {
+              const accountIds = pending.map((p) => p.account_id);
+              const { data: people } = await supabase
+                .from("profiles")
+                .select("id, display_name, handle")
+                .in("id", accountIds);
+
+              const labelById = new Map(
+                (people ?? []).map((person) => [
+                  person.id,
+                  person.handle ? `@${person.handle}` : person.display_name || person.id.slice(0, 8),
+                ]),
+              );
+
               pendingRequests = pending.map((p) => ({
                 accountId: p.account_id,
                 status: p.status,
                 createdAt: p.created_at,
+                label: labelById.get(p.account_id) ?? p.account_id.slice(0, 8),
               }));
             }
           }
@@ -194,6 +208,7 @@ export default async function CommunityDetailPage({
             isAuthenticated={userLoggedIn}
             membershipStatus={membershipStatus}
             hasEntryQuestions={hasEntryQuestions}
+            isOwner={isOwner}
           />
         </div>
 
@@ -202,13 +217,13 @@ export default async function CommunityDetailPage({
             <h3>{ar ? "طلبات الانضمام قيد الموافقة" : "Pending Membership Requests"}</h3>
             <p>
               {ar
-                ? "اطلب من العضو الإجابة على أسئلة الدخول أولاً، ثم aprov أو رفض الطلب."
+                ? "اطلب من العضو الإجابة على أسئلة الدخول أولاً، ثم اقبل أو ارفض الطلب."
                 : "Ask the member to complete the entry quiz first, then approve or reject the request."}
             </p>
             <ul className="pending-requests-list">
               {pendingRequests.map((req) => (
                 <li key={req.accountId} className="pending-request-item">
-                  <span>{req.accountId}</span>
+                  <span>{req.label}</span>
                   <div className="pending-request-actions">
                     <form action={approveMembershipAction} style={{ display: "inline" }}>
                       <input type="hidden" name="locale" value={locale} />

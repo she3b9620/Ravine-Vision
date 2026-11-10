@@ -44,7 +44,7 @@ export default async function CommunitiesPage({ params }: { params: Promise<{ lo
         .select(
           "id,name,description,guidelines,visibility,entry_questions,created_at,creator_identities(display_name,handle)"
         )
-        .eq("visibility", "public")
+        .in("visibility", ["public", "discoverable_private"])
         .order("created_at", { ascending: false })
         .limit(60);
       communities = (data ?? []) as CommunityRow[];

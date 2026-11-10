@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import Link from "next/link";
 import RAVINEOpenAuth from "@/components/open-auth-link";
 import {
   joinCommunityAction,
@@ -22,6 +23,7 @@ export default function CommunityMembershipButton({
   isAuthenticated,
   membershipStatus,
   hasEntryQuestions = false,
+  isOwner = false,
 }: Props) {
   const [isPending, startTransition] = useTransition();
   const ar = locale === "ar";
@@ -47,6 +49,22 @@ export default function CommunityMembershipButton({
       await leaveCommunityAction(formData);
     });
   };
+
+  if (isOwner) {
+    return (
+      <div className="community-membership-active-bar">
+        <span className="community-member-badge">
+          {ar ? "✓ أنت صاحب هذا المجتمع" : "✓ You lead this community"}
+        </span>
+        <Link
+          className="community-leave-button"
+          href={`/${locale}/creator/community/${communityId}/quiz`}
+        >
+          {ar ? "إدارة اختبار الدخول" : "Manage entry quiz"}
+        </Link>
+      </div>
+    );
+  }
 
   if (membershipStatus === "active") {
     return (

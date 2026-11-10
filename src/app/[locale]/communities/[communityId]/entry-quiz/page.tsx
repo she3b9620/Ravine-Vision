@@ -48,7 +48,7 @@ export default async function EntryQuizPage({
   return (
     <main className="simple-page entry-quiz-page" dir={ar ? "rtl" : "ltr"}>
       <Link className="back-link" href={`/${locale}/communities/${communityId}`}>
-        {ar ? "←返回 إلى المجتمع" : "← Back to community"}
+        {ar ? "← العودة إلى المجتمع" : "← Back to community"}
       </Link>
 
       <section className="community-header">

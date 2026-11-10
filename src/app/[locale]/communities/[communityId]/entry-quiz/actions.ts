@@ -24,22 +24,19 @@ export async function submitEntryQuizAction(formData: FormData) {
     redirect(`/${locale}/login`);
   }
 
-  // Verify the community has entry questions and the user hasn't already joined.
+  // Only the public question shape is read here; answer keys stay private.
   const { data: community } = await supabase
     .from("communities")
     .select("entry_questions")
     .eq("id", communityId)
     .maybeSingle();
 
-  const questions = community?.entry_questions as
-    | { id: string; question: string; type: string; options?: string[]; correct_answer?: string | string[] }[]
-    | undefined;
+  const questions = (community?.entry_questions ?? []) as { id: string }[];
 
   if (!Array.isArray(questions) || questions.length === 0) {
     redirect(route);
   }
 
-  // Check if already a member.
   const { data: existing } = await supabase
     .from("community_memberships")
     .select("status")
@@ -51,32 +48,27 @@ export async function submitEntryQuizAction(formData: FormData) {
     redirect(route);
   }
 
-  // Validate answers: every question must be answered correctly.
-  let allCorrect = true;
-  for (const q of questions) {
-    const userAnswer = formData.get(`question_${q.id}`);
-    if (userAnswer === null) {
-      allCorrect = false;
-      break;
-    }
-    const answer = String(userAnswer).trim();
-    const correct = q.correct_answer;
-    if (correct === undefined) {
-      allCorrect = false;
-      break;
-    }
-    const correctValues = Array.isArray(correct) ? correct : [correct];
-    if (!correctValues.some((c) => String(c).trim().toLowerCase() === answer.toLowerCase())) {
-      allCorrect = false;
-      break;
-    }
+  const answers: Record<string, string> = {};
+  for (const question of questions) {
+    const value = formData.get(`question_${question.id}`);
+    if (value !== null) answers[question.id] = String(value);
   }
 
-  if (!allCorrect) {
+  // The database compares answers against the private key table and returns a
+  // boolean. The key never reaches the browser.
+  const { data: correct, error: quizError } = await supabase.rpc(
+    "validate_community_entry_quiz",
+    { p_community_id: communityId, p_answers: answers },
+  );
+
+  if (quizError) {
+    redirect(route + "?error=membership");
+  }
+  if (!correct) {
     redirect(`${route}/entry-quiz?error=incorrect`);
   }
 
-  // Create the membership request (owner approval still required).
+  // Create the membership request; owner approval is still required.
   const { data: already } = await supabase
     .from("community_memberships")
     .select("status")
@@ -86,7 +78,7 @@ export async function submitEntryQuizAction(formData: FormData) {
 
   let error = null;
   if (already) {
-    if (already.status === "left") {
+    if (already.status === "left" || already.status === "requested") {
       const result = await supabase
         .from("community_memberships")
         .update({ status: "requested" })
