@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireUser } from "@/lib/supabase/session";
+import { WORK_KIND_LABELS, WORK_VISIBILITY_LABELS, labelFor } from "@/lib/labels";
 import { submitWorkForReview } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -28,10 +29,10 @@ export default async function CreatorLibraryPage({ params, searchParams }: Props
     <section className="creator-panel"><div className="creator-library-heading"><h2>{ar?"كل الأعمال":"All works"} <span>({works?.length ?? 0})</span></h2><Link href={"/"+locale+"/creator/studio"}>{ar?"إنشاء عمل جديد":"Create new work"} ↗</Link></div>
       {identities?.length ? <nav className="creator-team-actions" aria-label={ar?"تصفية حسب الهوية":"Filter by identity"}><Link className="creator-inline-link" href={"/"+locale+"/creator/library"}>{ar?"كل الهويات":"All identities"}</Link>{identities.map((identity)=><Link className="creator-inline-link" key={identity.id} href={"/"+locale+"/creator/library?identity="+identity.id}>{identity.display_name}</Link>)}</nav> : null}
       {works?.length ? <div className="creator-work-list">{works.map((work)=>{const identity=identities?.find((item)=>item.id===work.creator_identity_id);const canSubmit=work.status==="draft"&&identity?.status==="active";return <article className="creator-identity" key={work.id}>
-        <div><h3>{work.title}</h3><small>{work.kind.replaceAll("_"," ")}</small></div>
+        <div><h3>{work.title}</h3><small>{labelFor(WORK_KIND_LABELS,work.kind,locale)}</small></div>
         <p>{work.synopsis || (ar?"لا توجد نبذة بعد.":"No synopsis yet.")}</p>
         <small>{ar?"الهوية":"Identity"}: {identity?.display_name ?? work.creator_identity_id}</small>
-        <small>{ar?"الحالة":"Status"}: {status[work.status]??work.status} · {ar?"الظهور":"Visibility"}: {work.visibility}</small>
+        <small>{ar?"الحالة":"Status"}: {status[work.status]??work.status} · {ar?"الظهور":"Visibility"}: {labelFor(WORK_VISIBILITY_LABELS,work.visibility,locale)}</small>
         {work.status==="draft"&&work.review_notes && <p className="creator-review-note"><strong>{ar?"ملاحظات المراجعة:":"Review notes:"}</strong> {work.review_notes}</p>}
         {work.status==="in_review" && <small>{ar?"بانتظار قرار المراجعة. لا يمكن تعديل العمل أثناء المراجعة.":"Awaiting a review decision. The work cannot be edited while in review."}</small>}
         <div className="creator-team-actions">

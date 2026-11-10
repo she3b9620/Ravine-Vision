@@ -184,8 +184,8 @@ export default async function CommunityDetailPage({
             <h3>{ar ? "اختبار الدخول" : "Entry Quiz"}</h3>
             <p>
               {ar
-                ? "هذا مجتمع عام، ولكن يُطلب اجتياز اختبار قصير قبل إرسال طلب الانضمام، للتأكد من فهم طبيعة المجتمع وقواعده."
-                : "This is a public community, but a short quiz is required before sending a join request, to ensure understanding of the community and its rules."}
+                ? "يُطلب اجتياز اختبار قصير قبل إرسال طلب الانضمام، للتأكد من فهم طبيعة المجتمع وقواعده."
+                : "A short quiz is required before sending a join request, to ensure understanding of the community and its rules."}
             </p>
             <ul>
               {community.entry_questions.map((q) => (
@@ -262,7 +262,7 @@ export default async function CommunityDetailPage({
       </section>
 
       <footer className="community-footer">
-        <Link className="report-link" href={`/${locale}/report?subject_type=community&subject_id=${community.id}`}>
+        <Link className="report-link" href={`/${locale}/report?target_type=community&target_id=${community.id}`}>
           {ar ? "إبلاغ عن هذا المجتمع ↗" : "Report this community ↗"}
         </Link>
       </footer>

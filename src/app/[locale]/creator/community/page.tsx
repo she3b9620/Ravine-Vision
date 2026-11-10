@@ -83,7 +83,7 @@ export default async function CreatorCommunityPage({ params, searchParams }: Pro
         </p>
       </section>
 
-      {query.created && <p className="creator-alert success" role="status">{ar ? "تم إنشاء المجتمع العام." : "Public community created."}</p>}
+      {query.created && <p className="creator-alert success" role="status">{ar ? "تم إنشاء المجتمع." : "Community created."}</p>}
       {query.error && <p className="creator-alert" role="alert">{errors[query.error] ?? (ar ? "تعذر تنفيذ العملية." : "The action could not be completed.")}</p>}
 
       {identities && identities.length === 0 ? (

@@ -56,8 +56,8 @@ export default async function EntryQuizPage({
         <h1>{community.name}</h1>
         <p>
           {ar
-            ? "أجب على الأسئلة التالية بشكل صحيح للانضمام إلى هذا المجتمع العام."
-            : "Answer the following questions correctly to join this public community."}
+            ? "أجب على الأسئلة التالية بشكل صحيح للانضمام إلى هذا المجتمع."
+            : "Answer the following questions correctly to join this community."}
         </p>
 
         {query.error === "incorrect" && (

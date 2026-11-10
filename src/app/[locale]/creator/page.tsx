@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireUser } from "@/lib/supabase/session";
+import { DISCIPLINE_LABELS, labelFor } from "@/lib/labels";
 import { submitCreatorApplication } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,7 @@ export default async function CreatorPage({ params, searchParams }: Props) {
     {(query.error || query.submitted) && <p className={query.submitted?"creator-alert success":"creator-alert"} role="status">{query.submitted?(ar?"وصل طلبك وسيظل قيد المراجعة حتى اتخاذ قرار.":"Your application was received and will remain under review."):(errors[query.error??""]??"")}</p>}
     <div className="creator-columns">
       <section className="creator-panel"><h2>{ar?"هوياتك الإبداعية":"Your creative identities"}</h2>
-        {identities?.length ? identities.map((item)=>{const application=applications?.find((a)=>a.creator_identity_id===item.id);return <article className="creator-identity" key={item.id}><h3>{item.display_name}</h3><span>@{item.handle}</span><p>{item.biography}</p><small>{ar?"حالة الهوية":"Identity"}: {status[item.status]??item.status}</small>{application&&<small>{ar?"حالة الطلب":"Application"}: {status[application.status]??application.status}</small>}</article>}) : <p className="creator-muted">{ar?"لم تنشئ هوية إبداعية بعد.":"No creative identity yet."}</p>}
+        {identities?.length ? identities.map((item)=>{const application=applications?.find((a)=>a.creator_identity_id===item.id);return <article className="creator-identity" key={item.id}><h3>{item.display_name}</h3><span>{item.handle?"@"+item.handle:(ar?"بدون معرّف":"No handle")}</span><p>{item.biography}</p><small>{ar?"حالة الهوية":"Identity"}: {status[item.status]??item.status}</small>{application&&<small>{ar?"حالة الطلب":"Application"}: {status[application.status]??application.status}</small>}</article>}) : <p className="creator-muted">{ar?"لم تنشئ هوية إبداعية بعد.":"No creative identity yet."}</p>}
       </section>
       <section className="creator-panel"><h2>{ar?"طلب الانضمام كمبدع":"Apply as a creator"}</h2><p className="creator-muted">{ar?"ابدأ بهوية واحدة واضحة. كل هوية تخضع لمراجعة مستقلة.":"Start with one clear identity. Each identity is reviewed independently."}</p>
         <form action={submitCreatorApplication} className="creator-form">
@@ -35,7 +36,7 @@ export default async function CreatorPage({ params, searchParams }: Props) {
           <label>{ar?"الاسم الإبداعي":"Creative name"}<input name="display_name" minLength={2} maxLength={80} required/></label>
           <label>{ar?"اسم المستخدم (إنجليزي)":"Handle (English)"}<input name="handle" pattern="[A-Za-z0-9_]{3,30}" minLength={3} maxLength={30} placeholder="your_name" required/></label>
           <label>{ar?"نبذة عنك وخبرتك":"Biography and experience"}<textarea name="biography" minLength={30} maxLength={2000} rows={4} required/></label>
-          <fieldset><legend>{ar?"مجالاتك الإبداعية (اختر واحدًا على الأقل)":"Creative disciplines (choose at least one)"}</legend>{["cinema","video","photography","music","writing","research","visual_art","education","culture","other"].map((v)=><label className="creator-check" key={v}><input type="checkbox" name="discipline" value={v}/><span>{v.replace("_"," ")}</span></label>)}</fieldset>
+          <fieldset><legend>{ar?"مجالاتك الإبداعية (اختر واحدًا على الأقل)":"Creative disciplines (choose at least one)"}</legend>{["cinema","video","photography","music","writing","research","visual_art","education","culture","other"].map((v)=><label className="creator-check" key={v}><input type="checkbox" name="discipline" value={v}/><span>{labelFor(DISCIPLINE_LABELS,v,locale)}</span></label>)}</fieldset>
           <label>{ar?"بيان التقديم: ماذا تصنع؟ ولماذا تريد الانضمام؟":"Application statement: What do you create, and why RAVINE?"}<textarea name="statement" minLength={50} maxLength={4000} rows={6} required/></label>
           <button className="creator-submit" type="submit">{ar?"إرسال طلب المراجعة":"Submit for review"} <span>↗</span></button>
         </form>

@@ -8,6 +8,8 @@ export type ReactionKind = "appreciate" | "thoughtful" | "inspiring";
 
 const ALLOWED_REACTIONS: ReactionKind[] = ["appreciate", "thoughtful", "inspiring"];
 
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function toggleWorkReaction(
   workId: string,
   reaction: ReactionKind,
@@ -17,13 +19,16 @@ export async function toggleWorkReaction(
     throw new Error("Invalid reaction kind");
   }
 
+  const safeLocale = locale === "en" ? "en" : "ar";
+  if (!uuidPattern.test(workId)) redirect(`/${safeLocale}/works`);
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/${locale}/login`);
+    redirect(`/${safeLocale}/login`);
   }
 
   // Check if reaction already exists
@@ -34,32 +39,38 @@ export async function toggleWorkReaction(
     .eq("account_id", user.id)
     .maybeSingle();
 
+  let error = null;
   if (existing) {
     if (existing.reaction === reaction) {
       // Toggle off
-      await supabase
+      const result = await supabase
         .from("work_reactions")
         .delete()
         .eq("work_id", workId)
         .eq("account_id", user.id);
+      error = result.error;
     } else {
       // Update to new reaction
-      await supabase
+      const result = await supabase
         .from("work_reactions")
         .update({ reaction })
         .eq("work_id", workId)
         .eq("account_id", user.id);
+      error = result.error;
     }
   } else {
     // Insert new reaction
-    await supabase.from("work_reactions").insert({
+    const result = await supabase.from("work_reactions").insert({
       work_id: workId,
       account_id: user.id,
       reaction,
     });
+    error = result.error;
   }
 
-  revalidatePath(`/${locale}/works/${workId}`);
+  if (error) redirect(`/${safeLocale}/works/${workId}?error=reaction`);
+
+  revalidatePath(`/${safeLocale}/works/${workId}`);
 }
 
 export async function submitWorkComment(formData: FormData) {
@@ -69,6 +80,10 @@ export async function submitWorkComment(formData: FormData) {
 
   if (!workId || body.length < 1 || body.length > 5000) {
     redirect(`/${locale}/works/${workId}?error=comment_length`);
+  }
+
+  if (!uuidPattern.test(workId)) {
+    redirect(`/${locale}/works`);
   }
 
   const supabase = await createClient();

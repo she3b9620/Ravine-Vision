@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import { getAuthProviders } from "@/lib/auth-providers";
 import MemberHome from "@/components/member-home";
+import { resolveDisplayName } from "@/lib/display-name";
 import type { User } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -67,17 +68,32 @@ export default async function LocalizedHome({ params }: Props) {
     notFound();
   }
   let user: User | null = null;
+  let displayName = "";
+  let accountTier = "viewer";
   const env = getSupabaseEnvironment();
   if (env) {
     try {
       const supabase = await createClient();
       const { data } = await supabase.auth.getUser();
       user = data.user;
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("display_name,account_tier")
+          .eq("id", user.id)
+          .maybeSingle();
+        displayName =
+          profile?.display_name?.trim() ||
+          resolveDisplayName(user.user_metadata) ||
+          user.email?.split("@")[0] ||
+          (locale === "ar" ? "عضو رافين" : "RAVINE member");
+        if (profile?.account_tier) accountTier = profile.account_tier;
+      }
     } catch {
       user = null;
     }
   }
-  if (user) return <MemberHome locale={locale} displayName={String(user.user_metadata?.display_name ?? user.email?.split("@")[0] ?? (locale === "ar" ? "عضو رافين" : "RAVINE member"))} email={user.email ?? ""} />;
+  if (user) return <MemberHome locale={locale} displayName={displayName} email={user.email ?? ""} accountTier={accountTier} />;
   const t = content[locale];
   const ar = locale === "ar";
   // Only offer an identity provider that Supabase actually has enabled.

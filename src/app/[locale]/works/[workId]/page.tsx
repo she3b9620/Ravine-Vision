@@ -36,10 +36,13 @@ type CommentRaw = {
 
 export default async function WorkDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; workId: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { locale, workId } = await params;
+  const query = await searchParams;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
 
@@ -147,6 +150,22 @@ export default async function WorkDetailPage({
       <Link className="back-link" href={`/${locale}/works`}>
         {ar ? "← كل الأعمال" : "← All works"}
       </Link>
+
+      {query.error && (
+        <p className="creator-alert" role="alert">
+          {query.error === "comment_length"
+            ? ar
+              ? "التعليق فارغ أو أطول من الحد المسموح."
+              : "The comment is empty or longer than the limit."
+            : query.error === "comment_failed"
+              ? ar
+                ? "تعذر نشر التعليق. تأكد أن العمل منشور علنًا وأن حسابك مؤكد."
+                : "The comment could not be posted. Confirm the work is published publicly and your account is confirmed."
+              : ar
+                ? "تعذر تحديث تفاعلك. حاول مرة أخرى."
+                : "Could not update your reaction. Try again."}
+        </p>
+      )}
 
       <section className="work-theatrical-stage">
         <p className="eyebrow">

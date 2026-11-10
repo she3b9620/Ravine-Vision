@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import CreatorFollowButton from "@/components/creator-follow-button";
+import { DISCIPLINE_LABELS, labelFor } from "@/lib/labels";
 
 export const dynamic = "force-dynamic";
 
@@ -32,10 +33,13 @@ type CommunityItem = {
 
 export default async function CreatorProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; creatorId: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { locale, creatorId } = await params;
+  const query = await searchParams;
   if (locale !== "ar" && locale !== "en") notFound();
   const ar = locale === "ar";
 
@@ -102,6 +106,12 @@ export default async function CreatorProfilePage({
         {ar ? "← كل المبدعين" : "← All Creators"}
       </Link>
 
+      {query.error === "follow" && (
+        <p className="creator-alert" role="alert">
+          {ar ? "تعذر تحديث المتابعة. حاول مرة أخرى." : "Could not update your follow. Try again."}
+        </p>
+      )}
+
       <section className="creator-profile-header">
         <div className="creator-profile-avatar">
           {creator.display_name.slice(0, 1) || "R"}
@@ -130,7 +140,7 @@ export default async function CreatorProfilePage({
       {creator.discipline_tags?.length > 0 && (
         <div className="creator-tags">
           {creator.discipline_tags.map((tag) => (
-            <span key={tag} className="creator-tag">{tag}</span>
+            <span key={tag} className="creator-tag">{labelFor(DISCIPLINE_LABELS, tag, locale)}</span>
           ))}
         </div>
       )}
@@ -176,7 +186,7 @@ export default async function CreatorProfilePage({
       )}
 
       <footer className="creator-profile-footer">
-        <Link className="report-link" href={`/${locale}/report?subject_type=creator_identity&subject_id=${creator.id}`}>
+        <Link className="report-link" href={`/${locale}/report?target_type=creator_identity&target_id=${creator.id}`}>
           {ar ? "إبلاغ عن محتوى أو انتهاك ↗" : "Report content or violation ↗"}
         </Link>
       </footer>
