@@ -49,4 +49,5 @@ See:
 - [Architecture Principles](docs/ARCHITECTURE_PRINCIPLES.md)
 - [Open Decisions](docs/OPEN_DECISIONS.md)
 - [Work Publishing Workflow](docs/WORK_PUBLISHING.md)
+- [Community Governance](docs/COMMUNITY_GOVERNANCE.md)
 - [Economy and Monetization](docs/ECONOMY_AND_MONETIZATION.md)

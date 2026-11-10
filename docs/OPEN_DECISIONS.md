@@ -7,7 +7,10 @@ These items must not be silently finalized by implementation. Record options, tr
 - Account tiers, eligibility, verification, and upgrade criteria.
 - Exact relationship between personal accounts and multiple creator identities.
 - Discovery ranking, editorial selection, and recommendation controls.
-- Community privacy levels and governance.
+- Community governance, moderator roles, sanctions, and enforcement. The privacy
+  levels themselves (public, discoverable-private, invite-only) and the
+  request/owner-approval flow are implemented; see
+  [Community Governance](COMMUNITY_GOVERNANCE.md).
 - Live, audio, podcast, and collaboration capabilities.
 - Content categories, metadata, and archival standards.
 
