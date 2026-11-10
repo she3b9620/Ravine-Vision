@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
+import { DISCIPLINE_LABELS, labelFor } from "@/lib/labels";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,7 @@ export default async function CreatorsPage({ params }: { params: Promise<{ local
               {creator.discipline_tags?.length > 0 && (
                 <div className="creator-tags">
                   {creator.discipline_tags.map((tag) => (
-                    <span key={tag} className="creator-tag">{tag}</span>
+                    <span key={tag} className="creator-tag">{labelFor(DISCIPLINE_LABELS, tag, locale)}</span>
                   ))}
                 </div>
               )}

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireUser } from "@/lib/supabase/session";
+import { WORK_KIND_LABELS, labelFor } from "@/lib/labels";
 import { updateWorkDraft } from "./actions";
 export const dynamic="force-dynamic";
 type Props={params:Promise<{locale:string;workId:string}>};
@@ -20,7 +21,7 @@ export default async function EditWorkPage({params}:Props){
  <input type="hidden" name="locale" value={locale}/><input type="hidden" name="work_id" value={work.id}/>
  <label>{ar?"عنوان العمل":"Work title"}<input name="title" minLength={2} maxLength={160} required defaultValue={work.title}/></label>
  <label>{ar?"نبذة مختصرة":"Short synopsis"}<textarea name="synopsis" maxLength={3000} rows={5} defaultValue={work.synopsis??""}/></label>
- <label>{ar?"نوع العمل":"Work type"}<select name="kind" defaultValue={work.kind}>{kinds.map(k=><option key={k} value={k}>{k.replaceAll("_"," ")}</option>)}</select></label>
+ <label>{ar?"نوع العمل":"Work type"}<select name="kind" defaultValue={work.kind}>{kinds.map(k=><option key={k} value={k}>{labelFor(WORK_KIND_LABELS,k,locale)}</option>)}</select></label>
  <label>{ar?"لغة العمل":"Work language"}<select name="language_code" defaultValue={work.language_code}><option value="ar">العربية</option><option value="en">English</option><option value="und">{ar?"غير محددة":"Unspecified"}</option></select></label>
  <label>{ar?"الظهور بعد النشر":"Visibility after publishing"}<select name="visibility" defaultValue={work.visibility}><option value="public">{ar?"عام — يظهر للجمهور بعد اعتماد النشر":"Public — visible after publication approval"}</option><option value="unlisted">{ar?"غير مدرج — بالرابط فقط":"Unlisted — link only"}</option><option value="private">{ar?"خاص — لا يظهر علنًا":"Private — never public"}</option></select></label>
  <p className="creator-muted">{ar?"اختيار «عام» لا ينشر العمل بنفسه؛ النشر يتم فقط بعد مراجعة الفريق واعتماده. العمل يبقى مسودةً خاصة حتى ذلك الحين.":"Choosing “Public” does not publish the work by itself; publishing happens only after team review approval. The work stays a private draft until then."}</p>

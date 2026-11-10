@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import WorkReactionsBar from "@/components/work-reactions-bar";
 import WorkDiscussion from "@/components/work-discussion";
+import { WORK_KIND_LABELS, labelFor } from "@/lib/labels";
 import type { ReactionKind } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -170,7 +171,7 @@ export default async function WorkDetailPage({
       <section className="work-theatrical-stage">
         <p className="eyebrow">
           <span></span>
-          RAVINE / {work.kind.replaceAll("_", " ").toUpperCase()}
+          RAVINE / {labelFor(WORK_KIND_LABELS, work.kind, locale)}
         </p>
 
         <div className="work-stage-screen">
@@ -180,7 +181,7 @@ export default async function WorkDetailPage({
               {ar ? "فضاء عرض العمل" : "Work Presentation Stage"}
             </p>
             <p className="stage-kind-subtitle">
-              {work.kind.replaceAll("_", " ").toUpperCase()}
+              {labelFor(WORK_KIND_LABELS, work.kind, locale)}
             </p>
           </div>
         </div>
@@ -231,7 +232,7 @@ export default async function WorkDetailPage({
           </span>
           <span>
             {ar ? "النمط: " : "Kind: "}
-            {work.kind.replaceAll("_", " ").toUpperCase()}
+            {labelFor(WORK_KIND_LABELS, work.kind, locale)}
           </span>
         </div>
       </section>

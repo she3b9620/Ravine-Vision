@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
+import { WORK_KIND_LABELS, labelFor } from "@/lib/labels";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +60,7 @@ export default async function WorksPage({ params }: { params: Promise<{ locale: 
               : null;
             return (
               <Link className="domain-card public-work-card" key={work.id} href={`/${locale}/works/${work.id}`}>
-                <span>{work.kind.replaceAll("_", " ").toUpperCase()}</span>
+                <span>{labelFor(WORK_KIND_LABELS, work.kind, locale)}</span>
                 <h2>{work.title}</h2>
                 <p>{work.synopsis || (ar ? "عمل منشور على رافين." : "A work published on RAVINE.")}</p>
                 <small>{creator ? (creator.handle ? "@" + creator.handle : creator.display_name) : ""}{published ? " · " + published : ""}</small>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseEnvironment } from "@/lib/supabase/env";
 import CreatorFollowButton from "@/components/creator-follow-button";
-import { DISCIPLINE_LABELS, labelFor } from "@/lib/labels";
+import { DISCIPLINE_LABELS, WORK_KIND_LABELS, labelFor } from "@/lib/labels";
 
 export const dynamic = "force-dynamic";
 
@@ -151,7 +151,7 @@ export default async function CreatorProfilePage({
           <div className="domain-grid works-grid">
             {works.map((work) => (
               <Link className="domain-card public-work-card" key={work.id} href={`/${locale}/works/${work.id}`}>
-                <span>{work.kind.replaceAll("_", " ").toUpperCase()}</span>
+                <span>{labelFor(WORK_KIND_LABELS, work.kind, locale)}</span>
                 <h3>{work.title}</h3>
                 <p>{work.synopsis || (ar ? "عمل منشور على رافين." : "A work published on RAVINE.")}</p>
                 {work.published_at && (
